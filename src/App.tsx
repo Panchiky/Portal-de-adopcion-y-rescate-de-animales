@@ -12,6 +12,7 @@ import '@ionic/react/css/typography.css';
 /* Importación de tus pantallas de Auth */
 import Login from './pages/auth/Login';
 import CrearCuenta from './pages/auth/CrearCuenta';
+import Explorar from './pages/user/Explorar';
 
 setupIonicReact();
 
@@ -22,6 +23,7 @@ const App: React.FC = () => (
         {/* Rutas activas - Sintaxis v6 */}
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<CrearCuenta />} />
+        <Route path="/catalogo" element={<Explorar />} />
         
         {/* Redirección por defecto al abrir la app */}
         <Route path="/" element={<Navigate to="/login" replace />} />
