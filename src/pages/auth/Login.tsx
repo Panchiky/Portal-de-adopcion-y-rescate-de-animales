@@ -1,15 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { IonPage, IonContent, IonInput, IonButton, IonText, IonItem, IonLabel, IonGrid, IonRow, IonCol } from '@ionic/react';
+import { useNavigate } from 'react-router-dom';
 import './Login.css'; 
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
+  
+  // Estados para guardar lo que el usuario escribe
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // Función que se ejecuta al presionar "Ingresar"
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault(); // Evita que la página se recargue
+
+    if (!email || !password) {
+      alert('Por favor, ingresa tu correo y contraseña para continuar.');
+      return;
+    }
+
+    // Si los campos tienen texto, lo enviamos al catálogo
+    navigate('/catalogo');
+  };
+
   return (
     <IonPage>
       <IonContent fullscreen className="login-content">
         <IonGrid className="login-grid">
           <IonRow className="login-row">
             
-            {/* COLUMNA IZQUIERDA - Informativa (Se oculta en celulares) */}
+            {/* COLUMNA IZQUIERDA - Informativa */}
             <IonCol size="12" sizeMd="6" className="left-column">
               <div className="left-content">
                 <div className="logo">
@@ -49,7 +69,8 @@ const Login: React.FC = () => {
             {/* COLUMNA DERECHA - Formulario */}
             <IonCol size="12" sizeMd="6" className="right-column">
               <div className="form-wrapper">
-                <div className="login-form">
+                {/* Convertimos el contenedor en un form real */}
+                <form className="login-form" onSubmit={handleLogin}>
                   <IonText color="dark">
                     <h2 className="form-title">Bienvenido de vuelta</h2>
                     <p className="form-subtitle">Ingresa para continuar en PatitasGo.</p>
@@ -57,19 +78,30 @@ const Login: React.FC = () => {
 
                   <IonItem lines="none" className="input-item">
                     <IonLabel position="stacked">Correo electrónico</IonLabel>
-                    <IonInput type="email" placeholder="tomas@ejemplo.cl" />
+                    <IonInput 
+                      type="email" 
+                      placeholder="tomas@ejemplo.cl" 
+                      value={email}
+                      onIonInput={(e) => setEmail(e.detail.value!)}
+                    />
                   </IonItem>
 
                   <IonItem lines="none" className="input-item">
                     <IonLabel position="stacked">Contraseña</IonLabel>
-                    <IonInput type="password" placeholder="••••••••" />
+                    <IonInput 
+                      type="password" 
+                      placeholder="••••••••" 
+                      value={password}
+                      onIonInput={(e) => setPassword(e.detail.value!)}
+                    />
                   </IonItem>
 
                   <div className="forgot-password">
                     <a href="#">¿Olvidaste tu contraseña?</a>
                   </div>
 
-                  <IonButton expand="block" color="success" className="btn-ingresar" routerLink="/catalogo">
+                  {/* El botón ahora es tipo submit y ya no usa routerLink */}
+                  <IonButton type="submit" expand="block" color="success" className="btn-ingresar">
                     Ingresar
                   </IonButton>
 
@@ -87,7 +119,7 @@ const Login: React.FC = () => {
                     <strong>Privacidad por diseño</strong>
                     <p>Tus datos personales solo se comparten con el refugio al enviar una postulación.</p>
                   </div>
-                </div>
+                </form>
               </div>
             </IonCol>
 

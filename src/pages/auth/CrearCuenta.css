@@ -1,0 +1,189 @@
+.register-content {
+  --background: #ffffff;
+}
+
+.register-grid {
+  height: 100vh;
+  padding: 0;
+}
+
+.register-row {
+  height: 100%;
+}
+
+/* --- COLUMNA IZQUIERDA (Fondo Verde Oscuro) --- */
+.register-left-column {
+  background-color: #112818; /* Verde muy oscuro similar al diseño */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.register-left-content {
+  max-width: 500px;
+  width: 100%;
+}
+
+.register-logo {
+  font-weight: bold;
+  color: #28a745;
+  font-size: 1.2rem;
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot-light {
+  width: 10px;
+  height: 10px;
+  background-color: #28a745;
+  border-radius: 50%;
+}
+
+.register-main-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
+  margin-bottom: 15px;
+}
+
+.register-subtitle {
+  color: #b0c4b1;
+  font-size: 1rem;
+  margin-bottom: 40px;
+}
+
+.register-image-container {
+  margin-bottom: 25px;
+}
+
+.register-cat-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.badge-adopcion {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-weight: bold;
+  font-size: 0.8rem;
+  display: inline-block;
+  letter-spacing: 0.5px;
+}
+
+/* --- COLUMNA DERECHA (Formulario) --- */
+.register-right-column {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+}
+
+.register-form-wrapper {
+  width: 100%;
+  max-width: 500px;
+  padding: 20px;
+}
+
+.register-form {
+  background: white;
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+}
+
+.register-form-title {
+  font-weight: bold;
+  font-size: 1.8rem;
+  margin-bottom: 5px;
+}
+
+.register-form-subtitle {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 30px;
+}
+
+.register-input-item {
+  --background: #f8f9fa;
+  --border-radius: 12px;
+  --padding-start: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+}
+
+.password-hints {
+  display: flex;
+  gap: 15px;
+  font-size: 0.75rem;
+  color: #28a745;
+  font-weight: 600;
+  margin-left: 5px;
+  margin-bottom: 20px;
+}
+
+.checkbox-item {
+  --background: transparent;
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.checkbox-item ion-checkbox::part(container) {
+  margin-right: 15px;
+}
+
+.btn-crear-cuenta {
+  --border-radius: 12px;
+  margin-bottom: 15px;
+  font-weight: bold;
+  height: 48px;
+}
+
+.login-link {
+  margin-bottom: 30px;
+}
+
+.protected-data-box {
+  background-color: #eafbee;
+  padding: 15px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  color: #2b5933;
+}
+
+.protected-data-box strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #1a5626;
+}
+
+.protected-data-box p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* --- ADAPTACIÓN PARA CELULARES --- */
+@media (max-width: 900px) {
+  .register-left-column {
+    display: none;
+  }
+  .register-grid {
+    height: auto;
+    min-height: 100vh;
+  }
+  .register-form {
+    box-shadow: none;
+    border: none;
+    padding: 20px;
+  }
+}
