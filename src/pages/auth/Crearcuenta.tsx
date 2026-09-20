@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonInput, IonButton, IonText, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonCheckbox } from '@ionic/react';
+import { IonPage, IonContent, IonInput, IonButton, IonText, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonCheckbox, IonInputPasswordToggle } from '@ionic/react';
 import { useNavigate } from 'react-router-dom';
 import './CrearCuenta.css'; 
 
@@ -25,7 +25,6 @@ const CrearCuenta: React.FC = () => {
       return;
     }
 
-    // Si todo está bien, lo enviamos al catálogo
     navigate('/catalogo');
   };
 
@@ -35,7 +34,6 @@ const CrearCuenta: React.FC = () => {
         <IonGrid className="register-grid">
           <IonRow className="register-row">
             
-            {/* COLUMNA IZQUIERDA - Informativa (Fondo oscuro) */}
             <IonCol size="12" sizeMd="6" className="register-left-column">
               <div className="register-left-content">
                 <div className="register-logo">
@@ -61,7 +59,6 @@ const CrearCuenta: React.FC = () => {
               </div>
             </IonCol>
 
-            {/* COLUMNA DERECHA - Formulario */}
             <IonCol size="12" sizeMd="6" className="register-right-column">
               <div className="register-form-wrapper">
                 <form className="register-form" onSubmit={handleRegister}>
@@ -97,7 +94,10 @@ const CrearCuenta: React.FC = () => {
                       placeholder="••••••••" 
                       value={password}
                       onIonInput={(e) => setPassword(e.detail.value!)}
-                    />
+                    >
+                      {/* Primer ojito */}
+                      <IonInputPasswordToggle slot="end"></IonInputPasswordToggle>
+                    </IonInput>
                   </IonItem>
 
                   <IonItem lines="none" className="register-input-item">
@@ -107,17 +107,18 @@ const CrearCuenta: React.FC = () => {
                       placeholder="••••••••" 
                       value={confirmPassword}
                       onIonInput={(e) => setConfirmPassword(e.detail.value!)}
-                    />
+                    >
+                      {/* Segundo ojito */}
+                      <IonInputPasswordToggle slot="end"></IonInputPasswordToggle>
+                    </IonInput>
                   </IonItem>
 
-                  {/* Validaciones visuales */}
                   <div className="password-hints">
                     <span>✓ 8 caracteres</span>
                     <span>✓ una mayúscula</span>
                     <span>✓ un número</span>
                   </div>
 
-                  {/* Checkbox de términos */}
                   <IonItem lines="none" className="checkbox-item">
                     <IonCheckbox 
                       color="success" 

@@ -1,25 +1,22 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonInput, IonButton, IonText, IonItem, IonLabel, IonGrid, IonRow, IonCol } from '@ionic/react';
+import { IonPage, IonContent, IonInput, IonButton, IonText, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonInputPasswordToggle } from '@ionic/react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css'; 
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   
-  // Estados para guardar lo que el usuario escribe
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Función que se ejecuta al presionar "Ingresar"
   const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault(); // Evita que la página se recargue
+    e.preventDefault(); 
 
     if (!email || !password) {
       alert('Por favor, ingresa tu correo y contraseña para continuar.');
       return;
     }
 
-    // Si los campos tienen texto, lo enviamos al catálogo
     navigate('/catalogo');
   };
 
@@ -29,7 +26,6 @@ const Login: React.FC = () => {
         <IonGrid className="login-grid">
           <IonRow className="login-row">
             
-            {/* COLUMNA IZQUIERDA - Informativa */}
             <IonCol size="12" sizeMd="6" className="left-column">
               <div className="left-content">
                 <div className="logo">
@@ -66,10 +62,8 @@ const Login: React.FC = () => {
               </div>
             </IonCol>
 
-            {/* COLUMNA DERECHA - Formulario */}
             <IonCol size="12" sizeMd="6" className="right-column">
               <div className="form-wrapper">
-                {/* Convertimos el contenedor en un form real */}
                 <form className="login-form" onSubmit={handleLogin}>
                   <IonText color="dark">
                     <h2 className="form-title">Bienvenido de vuelta</h2>
@@ -93,14 +87,16 @@ const Login: React.FC = () => {
                       placeholder="••••••••" 
                       value={password}
                       onIonInput={(e) => setPassword(e.detail.value!)}
-                    />
+                    >
+                      {/* Aquí agregamos el ojito mágico */}
+                      <IonInputPasswordToggle slot="end"></IonInputPasswordToggle>
+                    </IonInput>
                   </IonItem>
 
                   <div className="forgot-password">
                     <a href="#">¿Olvidaste tu contraseña?</a>
                   </div>
 
-                  {/* El botón ahora es tipo submit y ya no usa routerLink */}
                   <IonButton type="submit" expand="block" color="success" className="btn-ingresar">
                     Ingresar
                   </IonButton>
