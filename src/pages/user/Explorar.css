@@ -1,0 +1,384 @@
+/* --- FONDO Y GRILLA BASE --- */
+.explore-content {
+  --background: #f4f5f7;
+}
+
+.explore-grid {
+  height: 100vh;
+  padding: 0;
+}
+
+.explore-row {
+  height: 100%;
+}
+
+/* --- BARRA LATERAL (Desktop) --- */
+.sidebar {
+  background-color: #ffffff;
+  border-right: 1px solid #eaeaea;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  margin-bottom: 40px;
+}
+
+.logo {
+  font-weight: bold;
+  color: #1a1a1a;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo .dot {
+  width: 12px;
+  height: 12px;
+  background-color: #28a745;
+  border-radius: 50%;
+}
+
+.logo-subtitle {
+  font-size: 0.65rem;
+  color: #888;
+  letter-spacing: 1px;
+  margin-left: 20px;
+  display: block;
+  margin-top: 5px;
+}
+
+.nav-menu {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 15px;
+  border-radius: 12px;
+  color: #555;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: #f8f9fa;
+}
+
+.nav-item.active {
+  background-color: #eafbee;
+  color: #1a5626;
+  font-weight: 600;
+}
+
+.nav-item ion-icon {
+  font-size: 1.2rem;
+}
+
+.help-box {
+  background-color: #eafbee;
+  padding: 20px;
+  border-radius: 16px;
+  text-align: left;
+}
+
+.help-box h4 {
+  margin: 0 0 8px 0;
+  color: #1a5626;
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+.help-box p {
+  margin: 0 0 15px 0;
+  font-size: 0.8rem;
+  color: #2b5933;
+  line-height: 1.4;
+}
+
+.btn-help {
+  --border-radius: 20px;
+  --color: #1a5626;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* --- CONTENIDO PRINCIPAL --- */
+.main-content {
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.top-section {
+  margin-bottom: 30px;
+}
+
+.header-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.page-subtitle {
+  color: #666;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.location-badge {
+  background-color: #eafbee;
+  color: #1a5626;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.search-filter-container {
+  display: flex;
+  gap: 15px;
+}
+
+.search-bar {
+  flex-grow: 1;
+  background: white;
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+  padding: 0 15px;
+}
+
+.btn-filter {
+  --border-radius: 12px;
+  --border-color: #eaeaea;
+  width: 120px;
+}
+
+/* --- TARJETAS --- */
+.cards-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.main-animal-card {
+  background: white;
+  border-radius: 24px;
+  flex: 2;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border: 1px solid #f0f0f0;
+}
+
+.main-animal-img {
+  width: 45%;
+  object-fit: cover;
+}
+
+.main-animal-details {
+  width: 55%;
+  padding: 30px;
+}
+
+.status-badge {
+  color: #28a745;
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.animal-name {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.animal-stats {
+  color: #555;
+  font-size: 0.9rem;
+  margin: 0 0 15px 0;
+}
+
+.tags-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tag {
+  background-color: #f4f5f7;
+  color: #555;
+  padding: 6px 14px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.animal-desc {
+  color: #333;
+  line-height: 1.5;
+  font-size: 0.95rem;
+  margin-bottom: 25px;
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 0 0 5px 0;
+}
+
+.text-muted {
+  color: #666;
+  font-size: 0.85rem;
+  margin: 0 0 15px 0;
+}
+
+.btn-postular {
+  --border-radius: 12px;
+  font-weight: bold;
+  height: 48px;
+  margin: 25px 0 15px 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.action-buttons .btn-secondary {
+  flex: 1;
+  --border-radius: 12px;
+  --border-color: #eaeaea;
+}
+
+.next-animal-card {
+  background: white;
+  border-radius: 24px;
+  flex: 1;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border: 1px solid #f0f0f0;
+}
+
+.next-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #888;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+}
+
+.next-animal-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 16px;
+  margin-bottom: 15px;
+}
+
+.animal-name-small {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin: 0 0 5px 0;
+}
+
+.animal-stats-small {
+  color: #555;
+  font-size: 0.85rem;
+  margin: 0 0 8px 0;
+}
+
+.text-muted-small {
+  color: #888;
+  font-size: 0.75rem;
+  margin: 0 0 20px 0;
+}
+
+.btn-ver-ficha {
+  --border-radius: 12px;
+  --border-color: #eaeaea;
+}
+
+/* --- BARRA INFERIOR MÓVIL (Oculta en Desktop) --- */
+.mobile-bottom-nav {
+  display: none;
+}
+
+/* --- ADAPTACIÓN PARA CELULARES --- */
+@media (max-width: 992px) {
+  .sidebar {
+    display: none;
+  }
+  
+  .cards-layout {
+    flex-direction: column;
+  }
+  
+  .main-animal-card {
+    flex-direction: column;
+  }
+  
+  .main-animal-img {
+    width: 100%;
+    height: 300px;
+  }
+  
+  .main-animal-details {
+    width: 100%;
+  }
+  
+  .main-content {
+    padding: 20px;
+    padding-bottom: 90px;
+  }
+
+  .mobile-bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    padding: 12px 10px;
+    box-shadow: 0px -4px 15px rgba(0, 0, 0, 0.05);
+    border-top: 1px solid #eaeaea;
+    z-index: 1000;
+  }
+
+  .nav-item-mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #888;
+    font-size: 0.65rem;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .nav-item-mobile.active {
+    color: #1a5626;
+    font-weight: bold;
+  }
+
+  .nav-item-mobile ion-icon {
+    font-size: 1.4rem;
+  }
+}
