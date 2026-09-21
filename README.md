@@ -61,16 +61,16 @@ Corresponden a personas que desean conocer animales rescatados, evaluar responsa
 
 Dentro de este grupo pueden existir personas que:
 
-- acceden principalmente desde un teléfono móvil;
-- desean buscar perros o gatos según especie, tamaño, región, comuna o distancia desde una ubicación elegida;
-- necesitan información clara sobre edad, comportamiento, compatibilidad y salud;
-- revisan diferentes perfiles antes de tomar una decisión;
-- requieren conocer si un animal continúa disponible;
-- desean enviar una postulación mediante un proceso formal;
-- necesitan consultar el estado de sus propias solicitudes;
-- quieren recibir una notificación cuando el refugio resuelva su postulación;
-- necesitan saber qué ocurre cuando su postulación es aceptada para continuar el proceso y cómo se coordina la entrevista;
-- desean realizar un aporte único o mensual para el cuidado de un animal.
+- Acceden principalmente desde un teléfono móvil.
+- Desean buscar perros o gatos según especie, tamaño, región, comuna o distancia desde una ubicación elegida.
+- Necesitan información clara sobre edad, comportamiento, compatibilidad y salud.
+- Revisan diferentes perfiles antes de tomar una decisión.
+- Requieren conocer si un animal continúa disponible.
+- Desean enviar una postulación mediante un proceso formal.
+- Necesitan consultar el estado de sus propias solicitudes.
+- Quieren recibir una notificación cuando el refugio resuelva su postulación.
+- Necesitan saber qué ocurre cuando su postulación es aceptada para continuar el proceso y cómo se coordina la entrevista.
+- Desean realizar un aporte único o mensual para el cuidado de un animal.
 
 #### Necesidades principales
 
@@ -93,14 +93,14 @@ Corresponden a integrantes autorizados del refugio responsables de mantener la i
 
 Dentro de este grupo pueden existir personas que:
 
-- trabajan principalmente desde un computador del refugio;
-- administran varios animales y postulaciones simultáneamente;
-- reciben solicitudes mediante canales diferentes;
-- necesitan actualizar rápidamente la disponibilidad de cada animal;
-- mantienen antecedentes de vacunas, desparasitaciones y condiciones médicas;
-- requieren registrar quién modificó una solicitud o ficha;
-- disponen de tiempo limitado para tareas administrativas;
-- necesitan evitar que información interna o sensible se publique por error.
+- Trabajan principalmente desde un computador del refugio.
+- Administran varios animales y postulaciones simultáneamente.
+- Reciben solicitudes mediante canales diferentes.
+- Necesitan actualizar rápidamente la disponibilidad de cada animal.
+- Mantienen antecedentes de vacunas, desparasitaciones y condiciones médicas.
+- Requieren registrar quién modificó una solicitud o ficha.
+- Disponen de tiempo limitado para tareas administrativas.
+- Necesitan evitar que información interna o sensible se publique por error.
 
 #### Necesidades principales
 
@@ -191,15 +191,15 @@ Encontrar un animal compatible con su hogar, conocer sus antecedentes relevantes
 
 Puede experimentar frustración cuando:
 
-- una publicación no indica si el animal continúa disponible;
-- debe repetir sus datos en diferentes canales;
-- no puede excluir animales ubicados demasiado lejos;
-- la ficha no identifica al refugio ni su comuna o región;
-- no sabe si su solicitud fue recibida;
-- un gesto o botón no explica claramente sus consecuencias;
-- no existe información sobre el avance de la postulación;
-- su postulación es aceptada en proceso, pero no encuentra instrucciones para confirmar o cambiar la cita;
-- la versión móvil oculta campos o acciones importantes.
+- Una publicación no indica si el animal continúa disponible.
+- Debe repetir sus datos en diferentes canales.
+- No puede excluir animales ubicados demasiado lejos.
+- La ficha no identifica al refugio ni su comuna o región.
+- No sabe si su solicitud fue recibida.
+- Un gesto o botón no explica claramente sus consecuencias.
+- No existe información sobre el avance de la postulación.
+- Su postulación es aceptada en proceso, pero no encuentra instrucciones para confirmar o cambiar la cita.
+- La versión móvil oculta campos o acciones importantes.
 
 #### Funcionalidades de la aplicación que utilizaría
 
@@ -253,14 +253,14 @@ Centralizar el trabajo administrativo del refugio, mantener información confiab
 
 Puede experimentar frustración cuando:
 
-- debe revisar múltiples conversaciones para reconstruir una solicitud;
-- el sistema exige pasos repetitivos para una operación frecuente;
-- no puede identificar rápidamente los casos pendientes;
-- una edición elimina información histórica;
-- las acciones de aprobar, rechazar o eliminar no solicitan confirmación;
-- una aceptación en proceso no reserva al animal ni genera una tarea de coordinación;
-- la interfaz móvil y web utilizan términos diferentes;
-- los errores no explican cómo corregir los datos.
+- Debe revisar múltiples conversaciones para reconstruir una solicitud.
+- El sistema exige pasos repetitivos para una operación frecuente.
+- No puede identificar rápidamente los casos pendientes.
+- Una edición elimina información histórica.
+- Las acciones de aprobar, rechazar o eliminar no solicitan confirmación.
+- Una aceptación en proceso no reserva al animal ni genera una tarea de coordinación.
+- La interfaz móvil y web utilizan términos diferentes.
+- Los errores no explican cómo corregir los datos.
 
 #### Funcionalidades de la aplicación que utilizaría
 
@@ -649,25 +649,25 @@ El Usuario tendrá acceso a las funciones relacionadas con la búsqueda, postula
 
 Podrá:
 
-- explorar y filtrar animales disponibles;
-- elegir una comuna o autorizar la ubicación aproximada y definir un radio de búsqueda;
-- consultar fichas públicas;
-- conocer el refugio responsable, su comuna, región y distancia aproximada antes de postular;
-- guardar interés sin crear una postulación;
-- completar y enviar una postulación;
-- consultar exclusivamente sus propias solicitudes;
-- recibir una notificación cuando su postulación sea preseleccionada y acceder desde ella al seguimiento correspondiente;
-- revisar una propuesta de entrevista cuando su postulación esté aceptada en proceso;
-- confirmar su asistencia o solicitar otro horario;
-- recibir y marcar sus alertas como leídas, y abrir desde ellas la vista relacionada cuando corresponda;
-- realizar apadrinamientos;
-- consultar sus aportes confirmados;
-- consultar y administrar sus favoritos;
-- editar información personal habilitada;
-- cambiar su contraseña;
-- configurar preferencias de apariencia;
-- consultar información y opciones de privacidad de datos;
-- cerrar sesión.
+- Explorar y filtrar animales disponibles.
+- Elegir una comuna o autorizar la ubicación aproximada y definir un radio de búsqueda.
+- Consultar fichas públicas.
+- Conocer el refugio responsable, su comuna, región y distancia aproximada antes de postular.
+- Guardar interés sin crear una postulación.
+- Completar y enviar una postulación.
+- Consultar exclusivamente sus propias solicitudes.
+- Recibir una notificación cuando su postulación sea preseleccionada y acceder desde ella al seguimiento correspondiente.
+- Revisar una propuesta de entrevista cuando su postulación esté aceptada en proceso.
+- Confirmar su asistencia o solicitar otro horario.
+- Recibir y marcar sus alertas como leídas, y abrir desde ellas la vista relacionada cuando corresponda.
+- Realizar apadrinamientos.
+- Consultar sus aportes confirmados.
+- Consultar y administrar sus favoritos.
+- Editar información personal habilitada.
+- Cambiar su contraseña.
+- Configurar preferencias de apariencia.
+- Consultar información y opciones de privacidad de datos.
+- Cerrar sesión.
 
 El Usuario no podrá publicar animales, acceder a solicitudes de otras personas, modificar estados, marcar unilateralmente una adopción como completada ni mantener antecedentes médicos.
 
@@ -686,19 +686,19 @@ El Administrador tendrá acceso a las funciones operativas del refugio.
 
 Podrá:
 
-- consultar el resumen operativo;
-- revisar y filtrar todas las postulaciones recibidas;
-- efectuar transiciones de estado válidas;
-- consultar el RUT y el teléfono únicamente cuando sean necesarios para evaluar o coordinar una solicitud;
-- proponer, reprogramar o cancelar una cita después de preseleccionar una postulación;
-- registrar asistencia, inasistencia y resultado de la entrevista;
-- devolver el animal a `DISPONIBLE` cuando una postulación aceptada termine rechazada o no se concrete dentro del plazo;
-- verificar presencialmente la identidad, el acuerdo de adopción y la entrega antes de marcar al animal como `ADOPTADO`;
-- crear, editar, publicar y archivar fichas;
-- registrar y actualizar eventos médicos;
-- distinguir información pública e interna;
-- consultar aportes confirmados sin acceder a credenciales financieras;
-- administrar su sesión.
+- Consultar el resumen operativo.
+- Revisar y filtrar todas las postulaciones recibidas.
+- Efectuar transiciones de estado válidas.
+- Consultar el RUT y el teléfono únicamente cuando sean necesarios para evaluar o coordinar una solicitud.
+- Proponer, reprogramar o cancelar una cita después de preseleccionar una postulación.
+- Registrar asistencia, inasistencia y resultado de la entrevista.
+- Devolver el animal a `DISPONIBLE` cuando una postulación aceptada termine rechazada o no se concrete dentro del plazo.
+- Verificar presencialmente la identidad, el acuerdo de adopción y la entrega antes de marcar al animal como `ADOPTADO`.
+- Crear, editar, publicar y archivar fichas.
+- Registrar y actualizar eventos médicos.
+- Distinguir información pública e interna.
+- Consultar aportes confirmados sin acceder a credenciales financieras.
+- Administrar su sesión.
 
 El Administrador no deberá aprobar automáticamente postulaciones, marcar una adopción como completada antes de la entrega ni almacenar datos completos de tarjetas.
 
@@ -891,7 +891,7 @@ La entrevista no se agenda durante el envío de la postulación. Solo después d
 
 **Rol:** Administrador
 
-**Objetivo:** revisar una solicitud y registrar una decisión válida y trazable.
+**Objetivo:** Revisar una solicitud y registrar una decisión válida y trazable.
 
 ```text
 
@@ -989,7 +989,7 @@ Una transición inválida o una solicitud resuelta por otro Administrador deber�
 
 **Roles:** Usuario con postulación `ACEPTADA_EN_PROCESO` y Administrador
 
-**Objetivo:** confirmar o reprogramar la entrevista, registrar su resultado y liberar o adoptar al animal mediante reglas trazables.
+**Objetivo:** Confirmar o reprogramar la entrevista, registrar su resultado y liberar o adoptar al animal mediante reglas trazables.
 
 ```text
 
