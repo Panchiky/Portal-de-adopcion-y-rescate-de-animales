@@ -13,6 +13,7 @@ import '@ionic/react/css/typography.css';
 import Login from './pages/auth/Login';
 import CrearCuenta from './pages/auth/CrearCuenta';
 import Explorar from './pages/user/Explorar';
+import Postular from './pages/user/Postular';
 
 /* Importación de tu nueva pantalla de Admin */
 import SolicitudesAdmin from './pages/admin/SolicitudesAdmin';
@@ -28,6 +29,7 @@ const App: React.FC = () => (
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<CrearCuenta />} />
         <Route path="/catalogo" element={<Explorar />} />
+        <Route path="/animales/:id/postular" element={<Postular />} />
         
         {/* Ruta para el panel de administración */}
         <Route path="/admin/solicitudes" element={<SolicitudesAdmin />} />

@@ -99,7 +99,7 @@ const Explorar: React.FC = () => {
                     
                     <p className="text-muted">Salud: vacunas, desparasitación y esterilización al día.</p>
 
-                    <IonButton expand="block" color="success" className="btn-postular">
+                    <IonButton expand="block" color="success" className="btn-postular" routerLink="/animales/1/postular">
                       Postular para adoptar
                     </IonButton>
 

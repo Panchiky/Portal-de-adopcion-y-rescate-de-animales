@@ -1,0 +1,64 @@
+.explore-content { --background: #f4f5f7; }
+.explore-grid { height: 100vh; padding: 0; }
+.explore-row { height: 100%; }
+
+.sidebar { background-color: #ffffff; border-right: 1px solid #eaeaea; padding: 30px 20px; display: flex; flex-direction: column; justify-content: space-between; }
+.logo { font-weight: bold; color: #1a1a1a; font-size: 1.4rem; display: flex; align-items: center; gap: 8px; }
+.logo .dot { width: 12px; height: 12px; background-color: #28a745; border-radius: 50%; }
+.logo-subtitle { font-size: 0.65rem; color: #888; letter-spacing: 1px; margin-left: 20px; display: block; margin-top: 5px; margin-bottom: 40px; }
+.nav-menu { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
+.nav-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; border-radius: 12px; color: #555; font-weight: 500; cursor: pointer; }
+.nav-item.active { background-color: #eafbee; color: #1a5626; font-weight: 600; }
+.nav-item ion-icon { font-size: 1.2rem; }
+.help-box { background-color: #eafbee; padding: 20px; border-radius: 16px; }
+.help-box h4 { margin: 0 0 8px 0; color: #1a5626; font-size: 0.95rem; font-weight: bold; }
+.help-box p { margin: 0 0 15px 0; font-size: 0.8rem; color: #2b5933; }
+.btn-help { --border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+
+.main-content { padding: 40px; overflow-y: auto; background: #f8f9fa; }
+.postula-container { max-width: 800px; margin: 0 auto; }
+
+.overline { font-size: 0.75rem; color: #888; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; display: block; }
+.postula-title { font-size: 2rem; font-weight: 800; color: #1a1a1a; margin: 0 0 5px 0; }
+.postula-subtitle { color: #666; font-size: 0.95rem; margin-bottom: 30px; }
+
+/* Indicador de pasos */
+.steps-indicator { display: flex; gap: 15px; margin-bottom: 30px; }
+.step-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #888; font-weight: 500; }
+.step-item.active { color: #1a5626; font-weight: bold; }
+.step-num { width: 24px; height: 24px; background: #eaeaea; color: #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; }
+.step-item.active .step-num { background: #28a745; color: white; }
+
+/* Tarjeta del formulario */
+.form-card { background: white; padding: 35px; border-radius: 20px; border: 1px solid #eaeaea; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+.form-step h3 { font-size: 1.2rem; font-weight: bold; margin-top: 0; margin-bottom: 25px; color: #1a1a1a; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+.input-group { display: flex; flex-direction: column; gap: 8px; }
+.input-group.full-width { grid-column: span 2; }
+.input-group label { font-size: 0.85rem; font-weight: 600; color: #333; }
+.input-group input, .input-group textarea { border: 1px solid #eaeaea; border-radius: 12px; padding: 12px 15px; font-size: 0.9rem; outline: none; background: #fafafa; }
+.input-group input:focus, .input-group textarea:focus { border-color: #28a745; background: white; }
+
+.form-actions { display: flex; justify-content: flex-end; }
+.form-actions.space-between { justify-content: space-between; align-items: center; }
+.btn-next { --border-radius: 12px; font-weight: bold; height: 44px; }
+
+.summary-box { background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; color: #333; border: 1px solid #eaeaea; }
+.summary-box p { margin: 5px 0; }
+.checkbox-container { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 30px; font-size: 0.85rem; color: #555; line-height: 1.4; }
+
+.mobile-bottom-nav { display: none; }
+
+@media (max-width: 992px) {
+  .sidebar { display: none; }
+  .main-content { padding: 20px; padding-bottom: 90px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .input-group.full-width { grid-column: span 1; }
+  .form-card { padding: 20px; }
+
+  .mobile-bottom-nav { display: flex; justify-content: space-around; align-items: center; position: fixed; bottom: 0; left: 0; width: 100%; background-color: white; padding: 12px 10px; border-top: 1px solid #eaeaea; z-index: 1000; }
+  .nav-item-mobile { display: flex; flex-direction: column; align-items: center; color: #888; font-size: 0.65rem; gap: 4px; }
+  .nav-item-mobile.active { color: #1a5626; font-weight: bold; }
+  .nav-item-mobile ion-icon { font-size: 1.4rem; }
+}
