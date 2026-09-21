@@ -17,7 +17,20 @@ const Login: React.FC = () => {
       return;
     }
 
-    navigate('/catalogo');
+    // Definimos qué correo activa el rol de administrador
+    const ADMIN_EMAIL = 'admin@patitasgo.cl'; 
+    const roleType = email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user';
+
+    // Guardamos la sesión y el rol detectado automáticamente en el navegador
+    localStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('userRole', roleType);
+
+    // Redirección inteligente según el correo ingresado
+    if (roleType === 'admin') {
+      navigate('/admin/solicitudes');
+    } else {
+      navigate('/catalogo');
+    }
   };
 
   return (
@@ -88,7 +101,6 @@ const Login: React.FC = () => {
                       value={password}
                       onIonInput={(e) => setPassword(e.detail.value!)}
                     >
-                      {/* Aquí agregamos el ojito mágico */}
                       <IonInputPasswordToggle slot="end"></IonInputPasswordToggle>
                     </IonInput>
                   </IonItem>
@@ -97,11 +109,12 @@ const Login: React.FC = () => {
                     <a href="#">¿Olvidaste tu contraseña?</a>
                   </div>
 
+                  {/* Único botón de ingresar limpio */}
                   <IonButton type="submit" expand="block" color="success" className="btn-ingresar">
                     Ingresar
                   </IonButton>
 
-                  <IonButton expand="block" fill="outline" color="dark" className="btn-google">
+                  <IonButton expand="block" fill="outline" color="dark" className="btn-google" style={{ marginTop: '10px' }}>
                     Continuar con Google
                   </IonButton>
 

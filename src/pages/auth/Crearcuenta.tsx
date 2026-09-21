@@ -25,7 +25,22 @@ const CrearCuenta: React.FC = () => {
       return;
     }
 
-    navigate('/catalogo');
+    // Definimos el correo exclusivo de administración (puedes cambiarlo o adaptarlo)
+    const ADMIN_EMAIL = 'admin@patitasgo.cl'; 
+
+    // El rol se decide automáticamente según el correo escrito
+    const roleType = email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user';
+
+    // Guardamos la sesión y el rol detectado en el navegador
+    localStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('userRole', roleType);
+
+    // Redirección automática según el rol detectado
+    if (roleType === 'admin') {
+      navigate('/admin/solicitudes');
+    } else {
+      navigate('/catalogo');
+    }
   };
 
   return (
@@ -95,7 +110,6 @@ const CrearCuenta: React.FC = () => {
                       value={password}
                       onIonInput={(e) => setPassword(e.detail.value!)}
                     >
-                      {/* Primer ojito */}
                       <IonInputPasswordToggle slot="end"></IonInputPasswordToggle>
                     </IonInput>
                   </IonItem>
@@ -108,7 +122,6 @@ const CrearCuenta: React.FC = () => {
                       value={confirmPassword}
                       onIonInput={(e) => setConfirmPassword(e.detail.value!)}
                     >
-                      {/* Segundo ojito */}
                       <IonInputPasswordToggle slot="end"></IonInputPasswordToggle>
                     </IonInput>
                   </IonItem>
@@ -130,6 +143,7 @@ const CrearCuenta: React.FC = () => {
                     </IonCheckbox>
                   </IonItem>
 
+                  {/* Único botón de registro que evalúa el correo */}
                   <IonButton type="submit" expand="block" color="success" className="btn-crear-cuenta">
                     Crear cuenta
                   </IonButton>
