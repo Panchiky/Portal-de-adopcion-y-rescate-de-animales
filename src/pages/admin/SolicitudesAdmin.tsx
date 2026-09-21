@@ -8,15 +8,23 @@ import {
   ellipsisHorizontal,
   searchOutline
 } from 'ionicons/icons';
+import { useNavigate } from 'react-router-dom';
 import './SolicitudesAdmin.css';
 
 const SolicitudesAdmin: React.FC = () => {
+  const navigate = useNavigate();
+
   const [solicitudes] = useState([
     { id: 1, iniciales: 'TG', colorAvatar: '#fef0c7', colorTexto: '#b45309', nombre: 'Tomás Guerra', rut: 'RUT •• 285.432-1', animal: 'Milo', fecha: '14 sep', estado: 'PENDIENTE', estadoClase: 'estado-pendiente', accion: 'Revisar' },
     { id: 2, iniciales: 'CM', colorAvatar: '#e0f2fe', colorTexto: '#0369a1', nombre: 'Camila Morales', rut: 'RUT •• 456.789-0', animal: 'Milo', fecha: '13 sep', estado: 'EN REVISIÓN', estadoClase: 'estado-revision', accion: 'Preseleccionar' },
     { id: 3, iniciales: 'JP', colorAvatar: '#dcfce7', colorTexto: '#15803d', nombre: 'Javier Pérez', rut: 'RUT •• 345.678-9', animal: 'Simón', fecha: '12 sep', estado: 'ENTREVISTA AGENDADA', estadoClase: 'estado-entrevista', accion: 'Ver agenda' },
     { id: 4, iniciales: 'AV', colorAvatar: '#fee2e2', colorTexto: '#b91c1c', nombre: 'Ana Vera', rut: 'RUT •• 234.567-8', animal: 'Milo', fecha: '11 sep', estado: 'RECHAZADA', estadoClase: 'estado-rechazada', accion: 'Revisar' }
   ]);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
 
   return (
     <IonPage>
@@ -33,21 +41,21 @@ const SolicitudesAdmin: React.FC = () => {
                 <span className="admin-logo-subtitle">PANEL DEL REFUGIO</span>
 
                 <div className="admin-nav-menu">
-                  <div className="admin-nav-item">
+                  <div className="admin-nav-item" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
                     <IonIcon icon={gridOutline} />
                     <span>Resumen</span>
                   </div>
-                  <div className="admin-nav-item active">
+                  <div className="admin-nav-item active" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
                     <IonIcon icon={documentTextOutline} />
                     <span>Solicitudes</span>
                   </div>
-                  <div className="admin-nav-item">
+                  <div className="admin-nav-item" onClick={() => navigate('/admin/animales')} style={{ cursor: 'pointer' }}>
                     <IonIcon icon={pawOutline} />
                     <span>Animales</span>
                   </div>
-                  <div className="admin-nav-item">
+                  <div className="admin-nav-item" onClick={() => navigate('/admin/agenda')} style={{ cursor: 'pointer' }}>
                     <IonIcon icon={personOutline} />
-                    <span>Perfil</span>
+                    <span>Agenda</span>
                   </div>
                 </div>
               </div>
@@ -56,7 +64,7 @@ const SolicitudesAdmin: React.FC = () => {
                 <div className="refugio-info">
                   <h4>Huellas Felices</h4>
                   <p>Administrador</p>
-                  <button className="btn-logout">Cerrar sesión</button>
+                  <button className="btn-logout" onClick={handleLogout}>Cerrar sesión</button>
                 </div>
               </div>
             </IonCol>
@@ -207,7 +215,6 @@ const SolicitudesAdmin: React.FC = () => {
                   </div>
                 </div>
                 
-                {/* Cuadro de información móvil */}
                 <div className="mobile-info-box">
                   <strong>Preseleccionar no aprueba la adopción</strong>
                   <p>Preselección → Horario → Entrevista → Resultado</p>
@@ -215,7 +222,6 @@ const SolicitudesAdmin: React.FC = () => {
                 </div>
               </div>
 
-              {/* Mensaje de pie (Desktop) */}
               <div className="desktop-footer-note">
                 <p><strong>Flujo: Pendiente → En revisión → Preseleccionado → Entrevista → Evaluación → Resultado</strong></p>
                 <p>Si no se concreta, el refugio puede continuar con otro postulante.</p>
@@ -227,21 +233,21 @@ const SolicitudesAdmin: React.FC = () => {
 
         {/* --- BARRA INFERIOR MÓVIL ADMIN --- */}
         <div className="admin-mobile-nav">
-          <div className="admin-nav-item-mobile">
+          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
             <IonIcon icon={gridOutline} />
             <span>Resumen</span>
           </div>
-          <div className="admin-nav-item-mobile active">
+          <div className="admin-nav-item-mobile active" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
             <IonIcon icon={documentTextOutline} />
             <span>Solicitudes</span>
           </div>
-          <div className="admin-nav-item-mobile">
+          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/animales')} style={{ cursor: 'pointer' }}>
             <IonIcon icon={pawOutline} />
             <span>Animales</span>
           </div>
-          <div className="admin-nav-item-mobile">
+          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/agenda')} style={{ cursor: 'pointer' }}>
             <IonIcon icon={personOutline} />
-            <span>Perfil</span>
+            <span>Agenda</span>
           </div>
         </div>
       </IonContent>

@@ -19,22 +19,69 @@ import Postular from './pages/user/Postular';
 import SolicitudesAdmin from './pages/admin/SolicitudesAdmin';
 import AnimalesAdmin from './pages/admin/AnimalesAdmin';
 import AgendaAdmin from './pages/admin/AgendaAdmin';
+
+/* Importación del componente de rutas protegidas */
+import { ProtectedRoute } from './routes/ProtectedRoute';
+
 setupIonicReact();
 
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
       <IonRouterOutlet>
-        {/* Rutas activas - Sintaxis v6 */}
+       
+        {/* Rutas Publicas*/}
+      
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<CrearCuenta />} />
-        <Route path="/catalogo" element={<Explorar />} />
-        <Route path="/animales/:id/postular" element={<Postular />} />
+
+   
+        {/* Rutas protegidas, usuario*/}
+     
+        <Route 
+          path="/catalogo" 
+          element={
+            <ProtectedRoute allowedRole="user">
+              <Explorar />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/animales/:id/postular" 
+          element={
+            <ProtectedRoute allowedRole="user">
+              <Postular />
+            </ProtectedRoute>
+          } 
+        />
         
-        {/* Ruta para el panel de administración */}
-        <Route path="/admin/solicitudes" element={<SolicitudesAdmin />} />
-        <Route path="/admin/animales" element={<AnimalesAdmin />} />
-        <Route path="/admin/agenda" element={<AgendaAdmin />} />
+      
+        {/* Rutas protegida admin*/}
+     
+        <Route 
+          path="/admin/solicitudes" 
+          element={
+            <ProtectedRoute allowedRole="admin">
+              <SolicitudesAdmin />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/animales" 
+          element={
+            <ProtectedRoute allowedRole="admin">
+              <AnimalesAdmin />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/agenda" 
+          element={
+            <ProtectedRoute allowedRole="admin">
+              <AgendaAdmin />
+            </ProtectedRoute>
+          } 
+        />
 
         {/* Redirección por defecto al abrir la app */}
         <Route path="/" element={<Navigate to="/login" replace />} />

@@ -9,15 +9,23 @@ import {
   searchOutline,
   addOutline
 } from 'ionicons/icons';
+import { useNavigate } from 'react-router-dom';
 import './AnimalesAdmin.css';
 
 const AnimalesAdmin: React.FC = () => {
+  const navigate = useNavigate();
+
   const [animales] = useState([
     { id: 'ANI-026', nombre: 'Milo', img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=100&q=80', especie: 'Gato', edad: '2 años', salud: 'AL DÍA', saludClase: 'salud-aldia', estado: 'PUBLICADO', estadoClase: 'estado-publicado' },
     { id: 'ANI-025', nombre: 'Luna', img: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=100&q=80', especie: 'Gato', edad: '8 años', salud: 'AL DÍA', saludClase: 'salud-aldia', estado: 'PUBLICADO', estadoClase: 'estado-publicado' },
     { id: 'ANI-024', nombre: 'Mabel', img: 'https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=100&q=80', especie: 'Gato', edad: '1 año', salud: 'PENDIENTE', saludClase: 'salud-pendiente', estado: 'BORRADOR', estadoClase: 'estado-borrador' },
     { id: 'ANI-023', nombre: 'Kira', img: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=100&q=80', especie: 'Perra', edad: '4 años', salud: 'CONTROL', saludClase: 'salud-control', estado: 'PUBLICADO', estadoClase: 'estado-publicado' }
   ]);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
 
   return (
     <IonPage>
@@ -34,21 +42,21 @@ const AnimalesAdmin: React.FC = () => {
                 <span className="admin-logo-subtitle">PANEL DEL REFUGIO</span>
 
                 <div className="admin-nav-menu">
-                  <div className="admin-nav-item">
+                  <div className="admin-nav-item" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
                     <IonIcon icon={gridOutline} />
                     <span>Resumen</span>
                   </div>
-                  <div className="admin-nav-item">
+                  <div className="admin-nav-item" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
                     <IonIcon icon={documentTextOutline} />
                     <span>Solicitudes</span>
                   </div>
-                  <div className="admin-nav-item active">
+                  <div className="admin-nav-item active" onClick={() => navigate('/admin/animales')} style={{ cursor: 'pointer' }}>
                     <IonIcon icon={pawOutline} />
                     <span>Animales</span>
                   </div>
-                  <div className="admin-nav-item">
+                  <div className="admin-nav-item" onClick={() => navigate('/admin/agenda')} style={{ cursor: 'pointer' }}>
                     <IonIcon icon={personOutline} />
-                    <span>Perfil</span>
+                    <span>Agenda</span>
                   </div>
                 </div>
               </div>
@@ -57,7 +65,7 @@ const AnimalesAdmin: React.FC = () => {
                 <div className="refugio-info">
                   <h4>Huellas Felices</h4>
                   <p>Administrador</p>
-                  <button className="btn-logout">Cerrar sesión</button>
+                  <button className="btn-logout" onClick={handleLogout}>Cerrar sesión</button>
                 </div>
               </div>
             </IonCol>
@@ -210,21 +218,21 @@ const AnimalesAdmin: React.FC = () => {
 
         {/* --- BARRA INFERIOR MÓVIL ADMIN --- */}
         <div className="admin-mobile-nav">
-          <div className="admin-nav-item-mobile">
+          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
             <IonIcon icon={gridOutline} />
             <span>Resumen</span>
           </div>
-          <div className="admin-nav-item-mobile">
+          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
             <IonIcon icon={documentTextOutline} />
             <span>Solicitudes</span>
           </div>
-          <div className="admin-nav-item-mobile active">
+          <div className="admin-nav-item-mobile active" onClick={() => navigate('/admin/animales')} style={{ cursor: 'pointer' }}>
             <IonIcon icon={pawOutline} />
             <span>Animales</span>
           </div>
-          <div className="admin-nav-item-mobile">
+          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/agenda')} style={{ cursor: 'pointer' }}>
             <IonIcon icon={personOutline} />
-            <span>Perfil</span>
+            <span>Agenda</span>
           </div>
         </div>
       </IonContent>

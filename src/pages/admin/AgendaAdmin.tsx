@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonIcon, IonButton } from '@ionic/react';
 import { gridOutline, documentTextOutline, pawOutline, personOutline, arrowBackOutline } from 'ionicons/icons';
+import { useNavigate } from 'react-router-dom';
 import './AgendaAdmin.css';
 
 const AgendaAdmin: React.FC = () => {
+  const navigate = useNavigate();
+
   const [bloques] = useState([
     { hora: '15:00', animal: 'Toby', postulante: 'Camila', disponible: false },
     { hora: '15:30', animal: 'Disponible', postulante: 'Reservable', disponible: true },
@@ -12,6 +15,11 @@ const AgendaAdmin: React.FC = () => {
     { hora: '17:00', animal: 'Max', postulante: 'Sofía', disponible: false },
     { hora: '17:30', animal: 'Disponible', postulante: 'Reservable', disponible: true },
   ]);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
 
   return (
     <IonPage>
@@ -27,21 +35,21 @@ const AgendaAdmin: React.FC = () => {
                 </div>
                 <span className="admin-logo-subtitle">PANEL DEL REFUGIO</span>
                 <div className="admin-nav-menu">
-                  <div className="admin-nav-item">
+                  <div className="admin-nav-item" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
                     <IonIcon icon={gridOutline} />
                     <span>Resumen</span>
                   </div>
-                  <div className="admin-nav-item active">
+                  <div className="admin-nav-item" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
                     <IonIcon icon={documentTextOutline} />
                     <span>Solicitudes</span>
                   </div>
-                  <div className="admin-nav-item">
+                  <div className="admin-nav-item" onClick={() => navigate('/admin/animales')} style={{ cursor: 'pointer' }}>
                     <IonIcon icon={pawOutline} />
                     <span>Animales</span>
                   </div>
-                  <div className="admin-nav-item">
+                  <div className="admin-nav-item active" onClick={() => navigate('/admin/agenda')} style={{ cursor: 'pointer' }}>
                     <IonIcon icon={personOutline} />
-                    <span>Perfil</span>
+                    <span>Agenda</span>
                   </div>
                 </div>
               </div>
@@ -49,7 +57,7 @@ const AgendaAdmin: React.FC = () => {
                 <div className="refugio-info">
                   <h4>Huellas Felices</h4>
                   <p>Administrador</p>
-                  <button className="btn-logout">Cerrar sesión</button>
+                  <button className="btn-logout" onClick={handleLogout}>Cerrar sesión</button>
                 </div>
               </div>
             </IonCol>
@@ -103,21 +111,21 @@ const AgendaAdmin: React.FC = () => {
 
         {/* --- BARRA INFERIOR MÓVIL ADMIN --- */}
         <div className="admin-mobile-nav">
-          <div className="admin-nav-item-mobile">
+          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
             <IonIcon icon={gridOutline} />
             <span>Resumen</span>
           </div>
-          <div className="admin-nav-item-mobile active">
+          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
             <IonIcon icon={documentTextOutline} />
             <span>Solicitudes</span>
           </div>
-          <div className="admin-nav-item-mobile">
+          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/animales')} style={{ cursor: 'pointer' }}>
             <IonIcon icon={pawOutline} />
             <span>Animales</span>
           </div>
-          <div className="admin-nav-item-mobile">
+          <div className="admin-nav-item-mobile active" onClick={() => navigate('/admin/agenda')} style={{ cursor: 'pointer' }}>
             <IonIcon icon={personOutline} />
-            <span>Perfil</span>
+            <span>Agenda</span>
           </div>
         </div>
       </IonContent>
