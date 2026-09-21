@@ -17,6 +17,7 @@ import Explorar from './pages/user/Explorar';
 /* Importación de tu nueva pantalla de Admin */
 import SolicitudesAdmin from './pages/admin/SolicitudesAdmin';
 import AnimalesAdmin from './pages/admin/AnimalesAdmin';
+import AgendaAdmin from './pages/admin/AgendaAdmin';
 setupIonicReact();
 
 const App: React.FC = () => (
@@ -31,6 +32,7 @@ const App: React.FC = () => (
         {/* Ruta para el panel de administración */}
         <Route path="/admin/solicitudes" element={<SolicitudesAdmin />} />
         <Route path="/admin/animales" element={<AnimalesAdmin />} />
+        <Route path="/admin/agenda" element={<AgendaAdmin />} />
 
         {/* Redirección por defecto al abrir la app */}
         <Route path="/" element={<Navigate to="/login" replace />} />

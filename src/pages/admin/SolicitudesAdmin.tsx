@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton, IonIcon, IonInput } from '@ionic/react';
+import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton, IonIcon } from '@ionic/react';
 import { 
   gridOutline, 
   documentTextOutline, 
@@ -143,7 +143,15 @@ const SolicitudesAdmin: React.FC = () => {
                         </td>
                         <td>
                           <div className="action-cell">
-                            <IonButton color="success" className="btn-action-table">{sol.accion}</IonButton>
+                            {sol.accion === 'Ver agenda' ? (
+                              <IonButton color="success" className="btn-action-table" routerLink="/admin/agenda">
+                                Ver agenda
+                              </IonButton>
+                            ) : (
+                              <IonButton color="success" className="btn-action-table">
+                                {sol.accion}
+                              </IonButton>
+                            )}
                             <IonButton fill="outline" color="medium" className="btn-more">
                               <IonIcon icon={ellipsisHorizontal} />
                             </IonButton>
