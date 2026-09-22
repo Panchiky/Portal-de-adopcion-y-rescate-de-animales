@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton, IonIcon, IonInput, IonTextarea, IonCheckbox } from '@ionic/react';
-import { searchOutline, documentTextOutline, notificationsOutline, personOutline, chevronForwardOutline, checkmarkCircle } from 'ionicons/icons';
+import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton, IonIcon, IonInput, IonTextarea, IonCheckbox, useIonRouter } from '@ionic/react';
+import { searchOutline, documentTextOutline, notificationsOutline, personOutline, chevronForwardOutline, arrowBackOutline } from 'ionicons/icons';
 import './Postular.css';
 
 const Postular: React.FC = () => {
   const [paso, setPaso] = useState(1); // 1: Datos, 2: Motivación, 3: Confirmación
+  const router = useIonRouter();
 
   return (
     <IonPage>
@@ -19,10 +20,18 @@ const Postular: React.FC = () => {
                 <span className="logo-subtitle">ADOPCIÓN Y RESCATE</span>
               </div>
               <div className="nav-menu">
-                <div className="nav-item active"><IonIcon icon={searchOutline} /><span>Explorar</span></div>
-                <div className="nav-item"><IonIcon icon={documentTextOutline} /><span>Postulaciones</span></div>
-                <div className="nav-item"><IonIcon icon={notificationsOutline} /><span>Alertas</span></div>
-                <div className="nav-item"><IonIcon icon={personOutline} /><span>Perfil</span></div>
+                <div className="nav-item active" onClick={() => router.push('/explorar')}>
+                  <IonIcon icon={searchOutline} /><span>Explorar</span>
+                </div>
+                <div className="nav-item" onClick={() => router.push('/postulaciones')}>
+                  <IonIcon icon={documentTextOutline} /><span>Postulaciones</span>
+                </div>
+                <div className="nav-item" onClick={() => router.push('/alertas')}>
+                  <IonIcon icon={notificationsOutline} /><span>Alertas</span>
+                </div>
+                <div className="nav-item" onClick={() => router.push('/perfil')}>
+                  <IonIcon icon={personOutline} /><span>Perfil</span>
+                </div>
               </div>
               <div className="help-box">
                 <h4>¿Necesitas ayuda?</h4><p>Revisa preguntas frecuentes o contacta al refugio.</p>
@@ -34,6 +43,14 @@ const Postular: React.FC = () => {
             <IonCol size="12" sizeMd="9" sizeLg="9.5" className="main-content">
               <div className="postula-container">
                 
+                {/* --- BOTÓN PARA VOLVER A EXPLORAR --- */}
+                <div style={{ marginBottom: '15px' }}>
+                  <IonButton fill="clear" color="dark" onClick={() => router.goBack()} style={{ paddingLeft: 0, fontWeight: 600 }}>
+                    <IonIcon icon={arrowBackOutline} slot="start" />
+                    Volver a explorar
+                  </IonButton>
+                </div>
+
                 <div className="postula-header">
                   <span className="overline">POSTULACIÓN DE ADOPCIÓN</span>
                   <h1 className="postula-title">Postular por Milo</h1>
@@ -124,7 +141,7 @@ const Postular: React.FC = () => {
                       </div>
                       <div className="form-actions space-between">
                         <IonButton fill="outline" color="dark" onClick={() => setPaso(2)}>Volver</IonButton>
-                        <IonButton color="success" className="btn-next" routerLink="/usuario/postulacion-enviada">
+                        <IonButton color="success" className="btn-next" onClick={() => router.push('/usuario/postulacion-enviada')}>
                           Enviar postulación definitiva
                         </IonButton>
                       </div>
@@ -140,10 +157,18 @@ const Postular: React.FC = () => {
 
         {/* --- BARRA INFERIOR MÓVIL --- */}
         <div className="mobile-bottom-nav">
-          <div className="nav-item-mobile active"><IonIcon icon={searchOutline} /><span>Explorar</span></div>
-          <div className="nav-item-mobile"><IonIcon icon={documentTextOutline} /><span>Postulaciones</span></div>
-          <div className="nav-item-mobile"><IonIcon icon={notificationsOutline} /><span>Alertas</span></div>
-          <div className="nav-item-mobile"><IonIcon icon={personOutline} /><span>Perfil</span></div>
+          <div className="nav-item-mobile active" onClick={() => router.push('/explorar')}>
+            <IonIcon icon={searchOutline} /><span>Explorar</span>
+          </div>
+          <div className="nav-item-mobile" onClick={() => router.push('/postulaciones')}>
+            <IonIcon icon={documentTextOutline} /><span>Postulaciones</span>
+          </div>
+          <div className="nav-item-mobile" onClick={() => router.push('/alertas')}>
+            <IonIcon icon={notificationsOutline} /><span>Alertas</span>
+          </div>
+          <div className="nav-item-mobile" onClick={() => router.push('/perfil')}>
+            <IonIcon icon={personOutline} /><span>Perfil</span>
+          </div>
         </div>
       </IonContent>
     </IonPage>

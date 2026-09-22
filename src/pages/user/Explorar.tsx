@@ -1,9 +1,87 @@
-import React from 'react';
-import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonInput, IonButton, IonIcon, IonText } from '@ionic/react';
-import { searchOutline, documentTextOutline, notificationsOutline, personOutline, heartOutline, optionsOutline, heart } from 'ionicons/icons';
+import React, { useState } from 'react';
+import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonInput, IonButton, IonIcon } from '@ionic/react';
+import { searchOutline, documentTextOutline, notificationsOutline, personOutline, heart } from 'ionicons/icons';
 import './Explorar.css';
 
+interface Animal {
+  id: number;
+  name: string;
+  species: string;
+  gender: string;
+  age: string;
+  size: string;
+  status: string;
+  tags: string[];
+  description: string;
+  shelter: string;
+  location: string;
+  distance: string;
+  health: string;
+  image: string;
+}
+
+const ANIMALS_DATA: Animal[] = [
+  {
+    id: 1,
+    name: "Milo",
+    species: "Gato mestizo",
+    gender: "Macho",
+    age: "2 años",
+    size: "Mediano",
+    status: "DISPONIBLE",
+    tags: ["Sociable", "Tranquilo", "Energía media"],
+    description: "Compañero sociable que disfruta las siestas al sol y busca un hogar estable y amoroso.",
+    shelter: "Huellas Felices",
+    location: "Valparaíso",
+    distance: "a 14 km",
+    health: "Salud: vacunas, desparasitación y esterilización al día.",
+    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: 2,
+    name: "Luna",
+    species: "Gato naranja",
+    gender: "Hembra",
+    age: "4 años",
+    size: "Mediano",
+    status: "DISPONIBLE",
+    tags: ["Juguetona", "Cariñosa", "Curiosa"],
+    description: "Una gata llena de energía que adora jugar con juguetes colgantes y recibir mimos en la barbilla.",
+    shelter: "Refugio Patitas",
+    location: "Viña del Mar",
+    distance: "a 18 km",
+    health: "Salud: esterilizada, vacunas al día y test negativo.",
+    image: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: 3,
+    name: "Rocky",
+    species: "Perro mestizo",
+    gender: "Macho",
+    age: "1 año",
+    size: "Grande",
+    status: "DISPONIBLE",
+    tags: ["Muy activo", "Fiel", "Protector"],
+    description: "Rocky es un cachorro grande con mucha energía, ideal para personas activas que disfruten salir a correr.",
+    shelter: "Amigos Peludos",
+    location: "Limache",
+    distance: "a 5 km",
+    health: "Salud: vacunado y desparasitado.",
+    image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+  }
+];
+
 const Explorar: React.FC = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Animal actual y siguiente (usando operador módulo para hacer un ciclo infinito)
+  const currentAnimal = ANIMALS_DATA[currentIndex];
+  const nextAnimal = ANIMALS_DATA[(currentIndex + 1) % ANIMALS_DATA.length];
+
+  const handleNextAnimal = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % ANIMALS_DATA.length);
+  };
+
   return (
     <IonPage>
       <IonContent fullscreen className="explore-content">
@@ -57,7 +135,7 @@ const Explorar: React.FC = () => {
                     <p className="page-subtitle">Ficha completa y una siguiente opción, sin gestos de rechazo.</p>
                   </div>
                   <div className="location-badge">
-                    12 animales • 25 km
+                    {ANIMALS_DATA.length} animales • 25 km
                   </div>
                 </div>
 
@@ -73,33 +151,36 @@ const Explorar: React.FC = () => {
 
               <div className="cards-layout">
                 
+                {/* --- TARJETA PRINCIPAL DINÁMICA --- */}
                 <div className="main-animal-card">
                   <img 
-                    src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                    alt="Milo" 
+                    src={currentAnimal.image} 
+                    alt={currentAnimal.name} 
                     className="main-animal-img"
                   />
                   <div className="main-animal-details">
-                    <span className="status-badge">DISPONIBLE</span>
-                    <h2 className="animal-name">Milo</h2>
-                    <p className="animal-stats">Gato mestizo • Macho • 2 años • Mediano</p>
+                    <span className="status-badge">{currentAnimal.status}</span>
+                    <h2 className="animal-name">{currentAnimal.name}</h2>
+                    <p className="animal-stats">
+                      {currentAnimal.species} • {currentAnimal.gender} • {currentAnimal.age} • {currentAnimal.size}
+                    </p>
                     
                     <div className="tags-container">
-                      <span className="tag">Sociable</span>
-                      <span className="tag">Tranquilo</span>
-                      <span className="tag">Energía media</span>
+                      {currentAnimal.tags.map((tag, index) => (
+                        <span key={index} className="tag">{tag}</span>
+                      ))}
                     </div>
 
                     <p className="animal-desc">
-                      Compañero sociable que disfruta las siestas al sol y busca un hogar estable y amoroso.
+                      {currentAnimal.description}
                     </p>
 
                     <h4 className="section-subtitle">Refugio y ubicación</h4>
-                    <p className="text-muted">Huellas Felices • Valparaíso • a 14 km</p>
+                    <p className="text-muted">{currentAnimal.shelter} • {currentAnimal.location} • {currentAnimal.distance}</p>
                     
-                    <p className="text-muted">Salud: vacunas, desparasitación y esterilización al día.</p>
+                    <p className="text-muted">{currentAnimal.health}</p>
 
-                    <IonButton expand="block" color="success" className="btn-postular" routerLink="/animales/1/postular">
+                    <IonButton expand="block" color="success" className="btn-postular" routerLink={`/animales/${currentAnimal.id}/postular`}>
                       Postular para adoptar
                     </IonButton>
 
@@ -115,20 +196,21 @@ const Explorar: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="next-animal-card">
+                {/* --- TARJETA DE SIGUIENTE ANIMAL (Al hacer clic avanza) --- */}
+                <div className="next-animal-card" onClick={handleNextAnimal} style={{ cursor: 'pointer' }}>
                   <span className="next-label">SIGUIENTE ANIMAL</span>
                   <img 
-                    src="https://images.unsplash.com/photo-1573865526739-10659fec78a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                    alt="Luna" 
+                    src={nextAnimal.image} 
+                    alt={nextAnimal.name} 
                     className="next-animal-img"
                   />
                   <div className="next-animal-details">
-                    <h3 className="animal-name-small">Luna</h3>
-                    <p className="animal-stats-small">Gato naranja • Hembra • 4 años</p>
-                    <p className="text-muted-small">Refugio Patitas • Viña del Mar • a 18 km</p>
+                    <h3 className="animal-name-small">{nextAnimal.name}</h3>
+                    <p className="animal-stats-small">{nextAnimal.species} • {nextAnimal.gender} • {nextAnimal.age}</p>
+                    <p className="text-muted-small">{nextAnimal.shelter} • {nextAnimal.location} • {nextAnimal.distance}</p>
                     
-                    <IonButton expand="block" fill="outline" color="dark" className="btn-ver-ficha">
-                      Ver ficha de Luna →
+                    <IonButton expand="block" fill="outline" color="dark" className="btn-ver-ficha" onClick={(e) => { e.stopPropagation(); handleNextAnimal(); }}>
+                      Ver ficha de {nextAnimal.name} →
                     </IonButton>
                   </div>
                 </div>
