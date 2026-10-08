@@ -10,12 +10,13 @@ import '@ionic/react/css/structure.css';
 import '@ionic/react/css/typography.css';
 
 /* Importación de tus pantallas de Auth y User */
+import Home from './pages/home/home';
 import Login from './pages/auth/Login';
 import CrearCuenta from './pages/auth/CrearCuenta';
 import Explorar from './pages/user/Explorar';
 import Postular from './pages/user/Postular';
 
-/* Importación de tu nueva pantalla de Admin */
+/* Importación de tus pantallas de Admin */
 import SolicitudesAdmin from './pages/admin/SolicitudesAdmin';
 import AnimalesAdmin from './pages/admin/AnimalesAdmin';
 import AgendaAdmin from './pages/admin/AgendaAdmin';
@@ -29,15 +30,14 @@ const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
       <IonRouterOutlet>
-       
-        {/* Rutas Publicas*/}
-      
+        
+        {/* Rutas Públicas */}
+        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<CrearCuenta />} />
 
-   
-        {/* Rutas protegidas, usuario*/}
-     
+        {/* Rutas protegidas, usuario */}
         <Route 
           path="/catalogo" 
           element={
@@ -54,10 +54,8 @@ const App: React.FC = () => (
             </ProtectedRoute>
           } 
         />
-        
-      
-        {/* Rutas protegida admin*/}
-     
+
+        {/* Rutas protegidas, admin */}
         <Route 
           path="/admin/solicitudes" 
           element={
@@ -83,8 +81,9 @@ const App: React.FC = () => (
           } 
         />
 
-        {/* Redirección por defecto al abrir la app */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* Redirección por defecto si la ruta no coincide */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+
       </IonRouterOutlet>
     </IonReactRouter>
   </IonApp>
