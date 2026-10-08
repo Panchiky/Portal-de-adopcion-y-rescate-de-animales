@@ -1210,6 +1210,19 @@ Las pantallas esenciales previstas son:
 Cada familia de pantalla deberá poseer adaptación móvil y web cuando corresponda al rol y contexto de uso. Los estados de carga, validación, ausencia de resultados, confirmación y transición pueden implementarse como variantes de una misma familia de pantalla cuando no requieran una ruta independiente. La navegación principal del Usuario continuará limitada a **Explorar, Postulaciones, Alertas y Perfil**; **Mis favoritos** y las opciones de cuenta permanecerán anidadas bajo Perfil, mientras que la coordinación y la entrevista confirmada permanecerán anidadas bajo Postulaciones. En escritorio, la ficha principal del animal podrá utilizar el espacio adicional mostrando una tarjeta compacta secundaria de otro animal disponible, facilitando la exploración continua sin alterar el significado de las acciones.
 
 ---
+##  Credenciales de Prueba para Evaluación
+
+Para facilitar la revisión de los flujos tanto de Usuario como de Administrador sin necesidad de registrar una nueva cuenta desde cero, se han habilitado las siguientes credenciales de acceso preconfiguradas:
+
+### 1. Perfil de Usuario (Exploración, Postulaciones y Apadrinamientos)
+* **Correo electrónico:** `tomas@ejemplo.cl` (o cualquier correo con formato válido `@gmail.com`, `@outlook.com`, etc.)
+* **Contraseña:** Cualquier contraseña
+* *Nota:* Al iniciar sesión con un correo estándar, el sistema dirigirá automáticamente la interfaz hacia la experiencia del rol **Usuario**.
+
+### 2. Perfil de Administrador (Gestión de Refugio, Solicitudes y Fichas)
+* **Correo electrónico:** `admin@patitasgo.cl`
+* **Contraseña:** Cualquier contraseña válida configurada en el sistema.
+* *Nota:* Al ingresar con este correo administrativo, el sistema validará el rol y desplegará el panel de control exclusivo para la gestión de solicitudes y animales del refugio.
 
 ## Librerías usadas con React (Ionic)
 
