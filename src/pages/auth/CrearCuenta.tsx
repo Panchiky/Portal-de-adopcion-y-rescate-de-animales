@@ -1,7 +1,17 @@
 import React, { useState } from 'react';
 import { IonPage, IonContent, IonInput, IonButton, IonText, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonCheckbox, IonInputPasswordToggle } from '@ionic/react';
 import { useNavigate } from 'react-router-dom';
+import { iniciarSesion, rutaInicioPorRol } from '../../services/authService';
 import './CrearCuenta.css'; 
+
+const REQUISITOS_PASSWORD = [
+  { texto: '8 caracteres', cumple: (p: string) => p.length >= 8 },
+  { texto: 'una mayúscula', cumple: (p: string) => /[A-ZÁÉÍÓÚÑ]/.test(p) },
+  { texto: 'un número', cumple: (p: string) => /\d/.test(p) },
+  { texto: 'un carácter especial', cumple: (p: string) => /[^A-Za-z0-9ÁÉÍÓÚÑáéíóúñ]/.test(p) }
+];
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const CrearCuenta: React.FC = () => {
   const navigate = useNavigate();
@@ -11,36 +21,43 @@ const CrearCuenta: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
+  const [error, setError] = useState('');
+
+  const passwordValida = REQUISITOS_PASSWORD.every((r) => r.cumple(password));
+  const coinciden = confirmPassword !== '' && password === confirmPassword;
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!nombre || !email || !password || !confirmPassword || !aceptaTerminos) {
-      alert('Por favor, completa todos los campos y acepta los términos para continuar.');
+      setError('Completa todos los campos y acepta los términos para continuar.');
+      return;
+    }
+
+    if (!EMAIL_REGEX.test(email)) {
+      setError('Ingresa un correo válido, por ejemplo nombre@correo.cl.');
+      return;
+    }
+
+    if (!passwordValida) {
+      setError('La contraseña no cumple todos los requisitos indicados.');
       return;
     }
 
     if (password !== confirmPassword) {
-      alert('Las contraseñas no coinciden.');
+      setError('Las contraseñas no coinciden.');
       return;
     }
 
+    setError('');
+
     // Definimos el correo exclusivo de administración (puedes cambiarlo o adaptarlo)
-    const ADMIN_EMAIL = 'admin@patitasgo.cl'; 
-
     // El rol se decide automáticamente según el correo escrito
-    const roleType = email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user';
-
     // Guardamos la sesión y el rol detectado en el navegador
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userRole', roleType);
+    const roleType = iniciarSesion(email);
 
     // Redirección automática según el rol detectado
-    if (roleType === 'admin') {
-      navigate('/admin/solicitudes');
-    } else {
-      navigate('/catalogo');
-    }
+    navigate(rutaInicioPorRol(roleType));
   };
 
   return (
@@ -127,10 +144,26 @@ const CrearCuenta: React.FC = () => {
                   </IonItem>
 
                   <div className="password-hints">
-                    <span>✓ 8 caracteres</span>
-                    <span>✓ una mayúscula</span>
-                    <span>✓ un número</span>
+                    {REQUISITOS_PASSWORD.map((r) => {
+                      const cumple = r.cumple(password);
+                      return (
+                        <span key={r.texto} className={cumple ? 'hint-ok' : 'hint-pendiente'}>
+                          {cumple ? '✓' : '✗'} {r.texto}
+                        </span>
+                      );
+                    })}
+                    {confirmPassword !== '' && (
+                      <span className={coinciden ? 'hint-ok' : 'hint-pendiente'}>
+                        {coinciden ? '✓ las contraseñas coinciden' : '✗ las contraseñas no coinciden'}
+                      </span>
+                    )}
                   </div>
+
+                  {error && (
+                    <IonText color="danger">
+                      <p className="register-error">{error}</p>
+                    </IonText>
+                  )}
 
                   <IonItem lines="none" className="checkbox-item">
                     <IonCheckbox 

@@ -187,3 +187,20 @@
     padding: 20px;
   }
 }
+/* --- VALIDACIÓN DINÁMICA DE CONTRASEÑA --- */
+.password-hints {
+  flex-wrap: wrap;
+}
+
+.password-hints .hint-ok {
+  color: #15803d;
+}
+
+.password-hints .hint-pendiente {
+  color: #b91c1c;
+}
+
+.register-error {
+  font-size: 0.85rem;
+  margin: 8px 0 0;
+}

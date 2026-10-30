@@ -506,3 +506,8 @@
     font-size: 1.4rem;
   }
 }
+/* --- ALTURA EN MÓVIL: el scroll lo maneja IonContent y la barra inferior va en IonFooter --- */
+@media (max-width: 992px) {
+  .admin-grid, .admin-row { height: auto; }
+  .admin-main { padding-bottom: 20px; }
+}
