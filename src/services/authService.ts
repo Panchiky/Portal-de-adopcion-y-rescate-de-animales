@@ -1,25 +1,43 @@
+import { api } from './api';
+import { guardarSesion, limpiarSesion, obtenerToken, obtenerUsuario, tokenVigente, UsuarioSesion } from './sesion';
+
 export type Rol = 'user' | 'admin';
 
-const ADMIN_EMAIL = 'admin@patitasgo.cl';
+interface RespuestaAuth {
+  ok: true;
+  data: { token: string; usuario: UsuarioSesion };
+}
 
-export const iniciarSesion = (email: string): Rol => {
-  const rol: Rol = email.toLowerCase() === ADMIN_EMAIL ? 'admin' : 'user';
-  localStorage.setItem('isAuthenticated', 'true');
-  localStorage.setItem('userRole', rol);
-  localStorage.setItem('userEmail', email);
-  return rol;
+export interface DatosRegistro {
+  nombre: string;
+  apellido: string;
+  email: string;
+  password: string;
+}
+
+const rolDe = (usuario: UsuarioSesion): Rol => (usuario.rol === 'ADMIN' ? 'admin' : 'user');
+
+export const iniciarSesion = async (email: string, password: string): Promise<Rol> => {
+  const { data } = await api.post<RespuestaAuth>('/auth/login', { email, password });
+  guardarSesion(data.data.token, data.data.usuario);
+  return rolDe(data.data.usuario);
 };
 
-export const cerrarSesion = () => {
-  localStorage.removeItem('isAuthenticated');
-  localStorage.removeItem('userRole');
-  localStorage.removeItem('userEmail');
+export const registrarse = async (datos: DatosRegistro): Promise<Rol> => {
+  const { data } = await api.post<RespuestaAuth>('/auth/registro', datos);
+  guardarSesion(data.data.token, data.data.usuario);
+  return rolDe(data.data.usuario);
 };
 
-export const estaAutenticado = () => localStorage.getItem('isAuthenticated') === 'true';
+export const cerrarSesion = () => limpiarSesion();
 
-export const obtenerRol = () => localStorage.getItem('userRole') as Rol | null;
+export const estaAutenticado = () => tokenVigente(obtenerToken());
 
-export const obtenerEmail = () => localStorage.getItem('userEmail') ?? '';
+export const obtenerRol = (): Rol | null => {
+  const usuario = obtenerUsuario();
+  return usuario ? rolDe(usuario) : null;
+};
+
+export const obtenerEmail = () => obtenerUsuario()?.email ?? '';
 
 export const rutaInicioPorRol = (rol: Rol | null) => (rol === 'admin' ? '/admin/resumen' : '/catalogo');

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonInput, IonButton, IonText, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonCheckbox, IonInputPasswordToggle } from '@ionic/react';
+import { IonPage, IonContent, IonInput, IonButton, IonText, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonCheckbox, IonInputPasswordToggle, IonSpinner } from '@ionic/react';
 import { useNavigate } from 'react-router-dom';
-import { iniciarSesion, rutaInicioPorRol } from '../../services/authService';
+import { registrarse, rutaInicioPorRol } from '../../services/authService';
+import { mensajeError } from '../../services/api';
 import './CrearCuenta.css'; 
 
 const REQUISITOS_PASSWORD = [
   { texto: '8 caracteres', cumple: (p: string) => p.length >= 8 },
   { texto: 'una mayúscula', cumple: (p: string) => /[A-ZÁÉÍÓÚÑ]/.test(p) },
+  { texto: 'una minúscula', cumple: (p: string) => /[a-záéíóúñ]/.test(p) },
   { texto: 'un número', cumple: (p: string) => /\d/.test(p) },
   { texto: 'un carácter especial', cumple: (p: string) => /[^A-Za-z0-9ÁÉÍÓÚÑáéíóúñ]/.test(p) }
 ];
@@ -22,15 +24,22 @@ const CrearCuenta: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
 
   const passwordValida = REQUISITOS_PASSWORD.every((r) => r.cumple(password));
   const coinciden = confirmPassword !== '' && password === confirmPassword;
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!nombre || !email || !password || !confirmPassword || !aceptaTerminos) {
       setError('Completa todos los campos y acepta los términos para continuar.');
+      return;
+    }
+
+    const [primerNombre, ...apellidos] = nombre.trim().split(/\s+/);
+    if (apellidos.length === 0) {
+      setError('Ingresa tu nombre y apellido.');
       return;
     }
 
@@ -50,14 +59,19 @@ const CrearCuenta: React.FC = () => {
     }
 
     setError('');
+    setCargando(true);
 
-    // Definimos el correo exclusivo de administración (puedes cambiarlo o adaptarlo)
-    // El rol se decide automáticamente según el correo escrito
-    // Guardamos la sesión y el rol detectado en el navegador
-    const roleType = iniciarSesion(email);
+    try {
+      // El backend crea la cuenta con rol de usuario y devuelve la sesión iniciada
+      const roleType = await registrarse({ nombre: primerNombre, apellido: apellidos.join(' '), email, password });
 
-    // Redirección automática según el rol detectado
-    navigate(rutaInicioPorRol(roleType));
+      // Redirección automática según el rol recibido
+      navigate(rutaInicioPorRol(roleType));
+    } catch (err) {
+      setError(mensajeError(err));
+    } finally {
+      setCargando(false);
+    }
   };
 
   return (
@@ -177,8 +191,8 @@ const CrearCuenta: React.FC = () => {
                   </IonItem>
 
                   {/* Único botón de registro que evalúa el correo */}
-                  <IonButton type="submit" expand="block" color="success" className="btn-crear-cuenta">
-                    Crear cuenta
+                  <IonButton type="submit" expand="block" color="success" className="btn-crear-cuenta" disabled={cargando}>
+                    {cargando ? <IonSpinner name="crescent" /> : 'Crear cuenta'}
                   </IonButton>
 
                   <div className="ion-text-center login-link">

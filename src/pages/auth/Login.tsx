@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonInput, IonButton, IonText, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonInputPasswordToggle, IonRouterLink, useIonRouter } from '@ionic/react';
+import { IonPage, IonContent, IonInput, IonButton, IonText, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonInputPasswordToggle, IonRouterLink, IonSpinner, useIonRouter } from '@ionic/react';
 import { useLocation } from 'react-router-dom';
 import { iniciarSesion, rutaInicioPorRol } from '../../services/authService';
+import { mensajeError } from '../../services/api';
 import './Login.css'; 
 
 const Login: React.FC = () => {
@@ -12,8 +13,9 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); 
 
     if (!email || !password) {
@@ -27,13 +29,19 @@ const Login: React.FC = () => {
     }
 
     setError('');
+    setCargando(true);
 
-    // Definimos qué correo activa el rol de administrador
-    // Guardamos la sesión y el rol detectado automáticamente en el navegador
-    const roleType = iniciarSesion(email);
+    try {
+      // El backend valida las credenciales y devuelve el token con el rol del usuario
+      const roleType = await iniciarSesion(email, password);
 
-    // Redirección inteligente según el correo ingresado
-    router.push(destino && roleType === 'user' ? destino : rutaInicioPorRol(roleType), 'root', 'replace');
+      // Redirección inteligente según el rol recibido
+      router.push(destino && roleType === 'user' ? destino : rutaInicioPorRol(roleType), 'root', 'replace');
+    } catch (err) {
+      setError(mensajeError(err));
+    } finally {
+      setCargando(false);
+    }
   };
 
   return (
@@ -119,8 +127,8 @@ const Login: React.FC = () => {
                   )}
 
                   {/* Único botón de ingresar limpio */}
-                  <IonButton type="submit" expand="block" color="success" className="btn-ingresar">
-                    Ingresar
+                  <IonButton type="submit" expand="block" color="success" className="btn-ingresar" disabled={cargando}>
+                    {cargando ? <IonSpinner name="crescent" /> : 'Ingresar'}
                   </IonButton>
 
                   <IonButton expand="block" fill="outline" color="dark" className="btn-google" style={{ marginTop: '10px' }} disabled>
