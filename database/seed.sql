@@ -1,6 +1,7 @@
 -- PatitasGo: datos de prueba
 -- Ejecutar después de schema.sql: psql -U postgres -d patitasgo -f database/seed.sql
--- Contraseñas de prueba: admin@patitasgo.cl / Admin123!  ·  tomas@ejemplo.cl / Usuario123!
+-- Contraseñas de prueba: admin@patitasgo.cl / Admin123! (Huellas Felices)  ·  admin.puerto@patitasgo.cl / Admin123! (Patitas del Puerto)
+--                        tomas@ejemplo.cl / Usuario123!
 SET client_encoding = 'UTF8';
 
 INSERT INTO roles (nombre) VALUES ('USUARIO'), ('ADMIN');
@@ -15,7 +16,10 @@ INSERT INTO usuarios (nombre, apellido, email, password_hash, rol_id, refugio_id
    (SELECT id FROM roles WHERE nombre = 'ADMIN'), 1, '+56 9 1111 2222', 'Valparaíso'),
   ('Tomás', 'Guerra', 'tomas@ejemplo.cl',
    '$2b$10$9bV4t92wNu4LixPAe7EJtu4d6NDznj1Q/rfpUonT2odTXj1qBOoOe',
-   (SELECT id FROM roles WHERE nombre = 'USUARIO'), NULL, '+56 9 5555 6666', 'Viña del Mar');
+   (SELECT id FROM roles WHERE nombre = 'USUARIO'), NULL, '+56 9 5555 6666', 'Viña del Mar'),
+  ('Admin', 'Patitas del Puerto', 'admin.puerto@patitasgo.cl',
+   '$2b$10$eKhJzPDAPiQqkymEMnsct.5aulkCd9H.zdd6NgQBx33R30vxoHOGu',
+   (SELECT id FROM roles WHERE nombre = 'ADMIN'), 2, '+56 9 3333 4444', 'Viña del Mar');
 
 INSERT INTO animales (refugio_id, nombre, especie, raza, sexo, edad_meses, tamano, estado, descripcion, salud, vacunado, esterilizado, foto_url) VALUES
   (1, 'Milo', 'GATO', 'Mestizo', 'MACHO', 24, 'MEDIANO', 'DISPONIBLE',

@@ -2,9 +2,14 @@ const jwt = require('jsonwebtoken');
 const { jwt: jwtConfig } = require('../config/env');
 const HttpError = require('../utils/httpError');
 
-function verificarToken(req, res, next) {
+function leerToken(req) {
   const [tipo, token] = (req.headers.authorization || '').split(' ');
-  if (tipo !== 'Bearer' || !token) {
+  return tipo === 'Bearer' && token ? token : null;
+}
+
+function verificarToken(req, res, next) {
+  const token = leerToken(req);
+  if (!token) {
     return next(new HttpError(401, 'Debes iniciar sesión para acceder a este recurso'));
   }
 
@@ -20,6 +25,20 @@ function verificarToken(req, res, next) {
   }
 }
 
+// Para rutas públicas que muestran más información si hay sesión (no falla sin token)
+function tokenOpcional(req, res, next) {
+  const token = leerToken(req);
+  if (token) {
+    try {
+      const payload = jwt.verify(token, jwtConfig.secret);
+      req.usuario = { id: payload.sub, rol: payload.rol, refugioId: payload.refugioId };
+    } catch (err) {
+      req.usuario = undefined;
+    }
+  }
+  next();
+}
+
 function permitirRoles(...roles) {
   return (req, res, next) => {
     if (!req.usuario || !roles.includes(req.usuario.rol)) {
@@ -29,4 +48,4 @@ function permitirRoles(...roles) {
   };
 }
 
-module.exports = { verificarToken, permitirRoles };
+module.exports = { verificarToken, tokenOpcional, permitirRoles };
