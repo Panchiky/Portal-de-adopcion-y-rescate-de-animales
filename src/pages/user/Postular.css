@@ -62,3 +62,8 @@
   .nav-item-mobile.active { color: #1a5626; font-weight: bold; }
   .nav-item-mobile ion-icon { font-size: 1.4rem; }
 }
+/* --- ALTURA EN MÓVIL: el scroll lo maneja IonContent y la barra inferior va en IonFooter --- */
+@media (max-width: 992px) {
+  .explore-grid, .explore-row { height: auto; }
+  .main-content { padding-bottom: 20px; }
+}

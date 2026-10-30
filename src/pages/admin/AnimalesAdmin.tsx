@@ -1,19 +1,10 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton, IonIcon } from '@ionic/react';
-import { 
-  gridOutline, 
-  documentTextOutline, 
-  pawOutline, 
-  personOutline, 
-  ellipsisHorizontal,
-  searchOutline,
-  addOutline
-} from 'ionicons/icons';
-import { useNavigate } from 'react-router-dom';
+import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton, IonIcon, IonToast } from '@ionic/react';
+import { ellipsisHorizontal, searchOutline, addOutline } from 'ionicons/icons';
+import { MenuLateralAdmin, BarraInferiorAdmin } from '../../components/MenuAdmin';
 import './AnimalesAdmin.css';
 
 const AnimalesAdmin: React.FC = () => {
-  const navigate = useNavigate();
 
   const [animales] = useState([
     { id: 'ANI-026', nombre: 'Milo', img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=100&q=80', especie: 'Gato', edad: '2 años', salud: 'AL DÍA', saludClase: 'salud-aldia', estado: 'PUBLICADO', estadoClase: 'estado-publicado' },
@@ -21,11 +12,23 @@ const AnimalesAdmin: React.FC = () => {
     { id: 'ANI-024', nombre: 'Mabel', img: 'https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=100&q=80', especie: 'Gato', edad: '1 año', salud: 'PENDIENTE', saludClase: 'salud-pendiente', estado: 'BORRADOR', estadoClase: 'estado-borrador' },
     { id: 'ANI-023', nombre: 'Kira', img: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=100&q=80', especie: 'Perra', edad: '4 años', salud: 'CONTROL', saludClase: 'salud-control', estado: 'PUBLICADO', estadoClase: 'estado-publicado' }
   ]);
+  const [busqueda, setBusqueda] = useState('');
+  const [estado, setEstado] = useState('TODOS');
+  const [especie, setEspecie] = useState('TODAS');
+  const [mensaje, setMensaje] = useState('');
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate('/login');
-  };
+  const ESTADOS = ['TODOS', 'PUBLICADO', 'BORRADOR'];
+  const ESPECIES = ['TODAS', 'GATO', 'PERRO'];
+  const siguiente = (lista: string[], actual: string) => lista[(lista.indexOf(actual) + 1) % lista.length];
+  const texto = busqueda.trim().toLowerCase();
+  const animalesVisibles = animales.filter((a) =>
+    (texto === '' || `${a.nombre} ${a.especie} ${a.id}`.toLowerCase().includes(texto)) &&
+    (estado === 'TODOS' || a.estado === estado) &&
+    (especie === 'TODAS' || a.especie.toUpperCase().startsWith(especie.slice(0, 4)))
+  );
+  const proximamente = (accion: string, nombre: string) =>
+    setMensaje(`${accion} de ${nombre}: disponible al integrar el backend (EP2).`);
+
 
   return (
     <IonPage>
@@ -35,39 +38,7 @@ const AnimalesAdmin: React.FC = () => {
             
             {/* --- BARRA LATERAL (Desktop) --- */}
             <IonCol size="12" sizeMd="3" sizeLg="2.5" className="admin-sidebar">
-              <div className="admin-sidebar-top">
-                <div className="admin-logo">
-                  <span className="admin-dot"></span> PatitasGo
-                </div>
-                <span className="admin-logo-subtitle">PANEL DEL REFUGIO</span>
-
-                <div className="admin-nav-menu">
-                  <div className="admin-nav-item" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
-                    <IonIcon icon={gridOutline} />
-                    <span>Resumen</span>
-                  </div>
-                  <div className="admin-nav-item" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
-                    <IonIcon icon={documentTextOutline} />
-                    <span>Solicitudes</span>
-                  </div>
-                  <div className="admin-nav-item active" onClick={() => navigate('/admin/animales')} style={{ cursor: 'pointer' }}>
-                    <IonIcon icon={pawOutline} />
-                    <span>Animales</span>
-                  </div>
-                  <div className="admin-nav-item" onClick={() => navigate('/admin/agenda')} style={{ cursor: 'pointer' }}>
-                    <IonIcon icon={personOutline} />
-                    <span>Agenda</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="admin-sidebar-bottom">
-                <div className="refugio-info">
-                  <h4>Huellas Felices</h4>
-                  <p>Administrador</p>
-                  <button className="btn-logout" onClick={handleLogout}>Cerrar sesión</button>
-                </div>
-              </div>
+              <MenuLateralAdmin activo="/admin/animales" />
             </IonCol>
 
             {/* --- CONTENIDO PRINCIPAL --- */}
@@ -79,7 +50,7 @@ const AnimalesAdmin: React.FC = () => {
                   <h1 className="admin-page-title">Animales</h1>
                   <p className="admin-page-subtitle">Crea, publica y mantiene cada ficha de rescate.</p>
                 </div>
-                <IonButton color="success" className="btn-nueva-ficha">
+                <IonButton color="success" className="btn-nueva-ficha" routerLink="/admin/animales/nuevo">
                   <IonIcon icon={addOutline} slot="start" />
                   Nueva ficha
                 </IonButton>
@@ -109,12 +80,12 @@ const AnimalesAdmin: React.FC = () => {
               <div className="filters-container">
                 <div className="search-bar">
                   <IonIcon icon={searchOutline} className="search-icon" />
-                  <input type="text" placeholder="Buscar por nombre, especie o ID" />
+                  <input type="text" placeholder="Buscar por nombre, especie o ID" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
                 </div>
                 <div className="filter-buttons">
-                  <button className="filter-btn">Estado: Todos</button>
-                  <button className="filter-btn">Especie: Todas</button>
-                  <button className="filter-btn text-success">Más filtros</button>
+                  <button className="filter-btn" onClick={() => setEstado(siguiente(ESTADOS, estado))}>Estado: {estado === 'TODOS' ? 'Todos' : estado}</button>
+                  <button className="filter-btn" onClick={() => setEspecie(siguiente(ESPECIES, especie))}>Especie: {especie === 'TODAS' ? 'Todas' : especie}</button>
+                  <button className="filter-btn text-success" onClick={() => { setBusqueda(''); setEstado('TODOS'); setEspecie('TODAS'); }}>Limpiar filtros</button>
                 </div>
               </div>
 
@@ -131,7 +102,7 @@ const AnimalesAdmin: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {animales.map((animal) => (
+                    {animalesVisibles.map((animal) => (
                       <tr key={animal.id}>
                         <td>
                           <div className="animal-cell">
@@ -151,9 +122,9 @@ const AnimalesAdmin: React.FC = () => {
                         </td>
                         <td>
                           <div className="action-cell">
-                            <button className="btn-text-success">Editar</button>
-                            <button className="btn-text-success">Salud</button>
-                            <IonButton fill="clear" color="medium" className="btn-more">
+                            <button className="btn-text-success" onClick={() => proximamente('Edición', animal.nombre)}>Editar</button>
+                            <button className="btn-text-success" onClick={() => proximamente('Historial médico', animal.nombre)}>Salud</button>
+                            <IonButton fill="clear" color="medium" className="btn-more" onClick={() => proximamente('Más opciones', animal.nombre)}>
                               <IonIcon icon={ellipsisHorizontal} />
                             </IonButton>
                           </div>
@@ -174,18 +145,18 @@ const AnimalesAdmin: React.FC = () => {
               <div className="mobile-cards-container">
                 <div className="mobile-search-wrapper">
                   <div className="search-bar">
-                    <input type="text" placeholder="Buscar por nombre o especie" />
+                    <input type="text" placeholder="Buscar por nombre o especie" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
                     <IonIcon icon={searchOutline} className="search-icon-end" />
                   </div>
                 </div>
 
                 <div className="mobile-tabs-scroll">
-                  <button className="mobile-tab active">Todos · 26</button>
-                  <button className="mobile-tab">Publicados · 21</button>
-                  <button className="mobile-tab">Borrador · 5</button>
+                  <button className={`mobile-tab ${estado === 'TODOS' ? 'active' : ''}`} onClick={() => setEstado('TODOS')}>Todos · {animales.length}</button>
+                  <button className={`mobile-tab ${estado === 'PUBLICADO' ? 'active' : ''}`} onClick={() => setEstado('PUBLICADO')}>Publicados · {animales.filter((a) => a.estado === 'PUBLICADO').length}</button>
+                  <button className={`mobile-tab ${estado === 'BORRADOR' ? 'active' : ''}`} onClick={() => setEstado('BORRADOR')}>Borrador · {animales.filter((a) => a.estado === 'BORRADOR').length}</button>
                 </div>
                 
-                {animales.map((animal) => (
+                {animalesVisibles.map((animal) => (
                   <div className="mobile-card" key={animal.id}>
                     <div className="mobile-card-header">
                       <div className="animal-cell">
@@ -198,9 +169,11 @@ const AnimalesAdmin: React.FC = () => {
                       <span className={`badge ${animal.estadoClase}`}>{animal.estado}</span>
                     </div>
                     <div className="mobile-card-actions-row">
-                      <button className="btn-text-success font-bold">Editar</button>
-                      <button className="btn-text-success font-bold">Historial</button>
-                      <IonIcon icon={ellipsisHorizontal} color="medium" />
+                      <button className="btn-text-success font-bold" onClick={() => proximamente('Edición', animal.nombre)}>Editar</button>
+                      <button className="btn-text-success font-bold" onClick={() => proximamente('Historial médico', animal.nombre)}>Historial</button>
+                      <IonButton fill="clear" color="medium" onClick={() => proximamente('Más opciones', animal.nombre)}>
+                        <IonIcon icon={ellipsisHorizontal} />
+                      </IonButton>
                     </div>
                   </div>
                 ))}
@@ -216,26 +189,9 @@ const AnimalesAdmin: React.FC = () => {
           </IonRow>
         </IonGrid>
 
-        {/* --- BARRA INFERIOR MÓVIL ADMIN --- */}
-        <div className="admin-mobile-nav">
-          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
-            <IonIcon icon={gridOutline} />
-            <span>Resumen</span>
-          </div>
-          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
-            <IonIcon icon={documentTextOutline} />
-            <span>Solicitudes</span>
-          </div>
-          <div className="admin-nav-item-mobile active" onClick={() => navigate('/admin/animales')} style={{ cursor: 'pointer' }}>
-            <IonIcon icon={pawOutline} />
-            <span>Animales</span>
-          </div>
-          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/agenda')} style={{ cursor: 'pointer' }}>
-            <IonIcon icon={personOutline} />
-            <span>Agenda</span>
-          </div>
-        </div>
+        <IonToast isOpen={mensaje !== ''} message={mensaje} duration={2500} onDidDismiss={() => setMensaje('')} />
       </IonContent>
+      <BarraInferiorAdmin activo="/admin/animales" />
     </IonPage>
   );
 };

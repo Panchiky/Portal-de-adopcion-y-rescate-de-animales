@@ -1,5 +1,6 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useResolvedPath } from 'react-router-dom';
+import { estaAutenticado, obtenerRol, rutaInicioPorRol } from '../services/authService';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -7,15 +8,15 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRole }) => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  const userRole = localStorage.getItem('userRole');
+  const rutaActual = useResolvedPath('.').pathname;
+  const userRole = obtenerRol();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (!estaAutenticado()) {
+    return <Navigate to="/login" replace state={{ from: rutaActual }} />;
   }
 
   if (allowedRole && userRole !== allowedRole) {
-    return <Navigate to={userRole === 'admin' ? '/admin/solicitudes' : '/catalogo'} replace />;
+    return <Navigate to={rutaInicioPorRol(userRole)} replace />;
   }
 
   return <>{children}</>;

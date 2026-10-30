@@ -1,18 +1,10 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton, IonIcon } from '@ionic/react';
-import { 
-  gridOutline, 
-  documentTextOutline, 
-  pawOutline, 
-  personOutline, 
-  ellipsisHorizontal,
-  searchOutline
-} from 'ionicons/icons';
-import { useNavigate } from 'react-router-dom';
+import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton, IonIcon, IonToast } from '@ionic/react';
+import { ellipsisHorizontal, searchOutline } from 'ionicons/icons';
+import { MenuLateralAdmin, BarraInferiorAdmin } from '../../components/MenuAdmin';
 import './SolicitudesAdmin.css';
 
 const SolicitudesAdmin: React.FC = () => {
-  const navigate = useNavigate();
 
   const [solicitudes] = useState([
     { id: 1, iniciales: 'TG', colorAvatar: '#fef0c7', colorTexto: '#b45309', nombre: 'Tomás Guerra', rut: 'RUT •• 285.432-1', animal: 'Milo', fecha: '14 sep', estado: 'PENDIENTE', estadoClase: 'estado-pendiente', accion: 'Revisar' },
@@ -20,11 +12,24 @@ const SolicitudesAdmin: React.FC = () => {
     { id: 3, iniciales: 'JP', colorAvatar: '#dcfce7', colorTexto: '#15803d', nombre: 'Javier Pérez', rut: 'RUT •• 345.678-9', animal: 'Simón', fecha: '12 sep', estado: 'ENTREVISTA AGENDADA', estadoClase: 'estado-entrevista', accion: 'Ver agenda' },
     { id: 4, iniciales: 'AV', colorAvatar: '#fee2e2', colorTexto: '#b91c1c', nombre: 'Ana Vera', rut: 'RUT •• 234.567-8', animal: 'Milo', fecha: '11 sep', estado: 'RECHAZADA', estadoClase: 'estado-rechazada', accion: 'Revisar' }
   ]);
+  const [busqueda, setBusqueda] = useState('');
+  const [estado, setEstado] = useState('Todos');
+  const [animal, setAnimal] = useState('Todos');
+  const [mensaje, setMensaje] = useState('');
+  const [tabMovil, setTabMovil] = useState<'Pendientes' | 'En revisión' | 'Cerradas'>('Pendientes');
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate('/login');
-  };
+  const ESTADOS = ['Todos', ...Array.from(new Set(solicitudes.map((s) => s.estado)))];
+  const ANIMALES = ['Todos', ...Array.from(new Set(solicitudes.map((s) => s.animal)))];
+  const siguiente = (lista: string[], actual: string) => lista[(lista.indexOf(actual) + 1) % lista.length];
+  const texto = busqueda.trim().toLowerCase();
+  const solicitudesVisibles = solicitudes.filter((s) =>
+    (texto === '' || `${s.nombre} ${s.animal}`.toLowerCase().includes(texto)) &&
+    (estado === 'Todos' || s.estado === estado) &&
+    (animal === 'Todos' || s.animal === animal)
+  );
+  const ESTADOS_TAB = { 'Pendientes': ['PENDIENTE'], 'En revisión': ['EN REVISIÓN', 'ENTREVISTA AGENDADA'], 'Cerradas': ['RECHAZADA'] };
+  const solicitudesMovil = solicitudesVisibles.filter((s) => ESTADOS_TAB[tabMovil].includes(s.estado));
+
 
   return (
     <IonPage>
@@ -34,39 +39,7 @@ const SolicitudesAdmin: React.FC = () => {
             
             {/* --- BARRA LATERAL (Desktop) --- */}
             <IonCol size="12" sizeMd="3" sizeLg="2.5" className="admin-sidebar">
-              <div className="admin-sidebar-top">
-                <div className="admin-logo">
-                  <span className="admin-dot"></span> PatitasGo
-                </div>
-                <span className="admin-logo-subtitle">PANEL DEL REFUGIO</span>
-
-                <div className="admin-nav-menu">
-                  <div className="admin-nav-item" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
-                    <IonIcon icon={gridOutline} />
-                    <span>Resumen</span>
-                  </div>
-                  <div className="admin-nav-item active" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
-                    <IonIcon icon={documentTextOutline} />
-                    <span>Solicitudes</span>
-                  </div>
-                  <div className="admin-nav-item" onClick={() => navigate('/admin/animales')} style={{ cursor: 'pointer' }}>
-                    <IonIcon icon={pawOutline} />
-                    <span>Animales</span>
-                  </div>
-                  <div className="admin-nav-item" onClick={() => navigate('/admin/agenda')} style={{ cursor: 'pointer' }}>
-                    <IonIcon icon={personOutline} />
-                    <span>Agenda</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="admin-sidebar-bottom">
-                <div className="refugio-info">
-                  <h4>Huellas Felices</h4>
-                  <p>Administrador</p>
-                  <button className="btn-logout" onClick={handleLogout}>Cerrar sesión</button>
-                </div>
-              </div>
+              <MenuLateralAdmin activo="/admin/solicitudes" />
             </IonCol>
 
             {/* --- CONTENIDO PRINCIPAL --- */}
@@ -78,7 +51,7 @@ const SolicitudesAdmin: React.FC = () => {
                   <h1 className="admin-page-title">Gestión de solicitudes</h1>
                   <p className="admin-page-subtitle">Revisa antecedentes, preselecciona y deja que PatitasGo coordine los horarios.</p>
                 </div>
-                <IonButton fill="outline" color="dark" className="btn-export">
+                <IonButton fill="outline" color="dark" className="btn-export" onClick={() => setMensaje('Resumen exportado: 4 solicitudes (la descarga real se habilita con el backend en EP2).')}>
                   Exportar resumen
                 </IonButton>
               </div>
@@ -107,11 +80,11 @@ const SolicitudesAdmin: React.FC = () => {
               <div className="filters-container">
                 <div className="search-bar">
                   <IonIcon icon={searchOutline} className="search-icon" />
-                  <input type="text" placeholder="Buscar por persona o animal" />
+                  <input type="text" placeholder="Buscar por persona o animal" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
                 </div>
                 <div className="filter-buttons">
-                  <button className="filter-btn">Estado: Todos</button>
-                  <button className="filter-btn">Animal: Todos</button>
+                  <button className="filter-btn" onClick={() => setEstado(siguiente(ESTADOS, estado))}>Estado: {estado}</button>
+                  <button className="filter-btn" onClick={() => setAnimal(siguiente(ANIMALES, animal))}>Animal: {animal}</button>
                 </div>
                 <div className="update-label">
                   <span>Actualizado hoy</span>
@@ -131,7 +104,7 @@ const SolicitudesAdmin: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {solicitudes.map((sol) => (
+                    {solicitudesVisibles.map((sol) => (
                       <tr key={sol.id}>
                         <td>
                           <div className="postulante-cell">
@@ -156,11 +129,11 @@ const SolicitudesAdmin: React.FC = () => {
                                 Ver agenda
                               </IonButton>
                             ) : (
-                              <IonButton color="success" className="btn-action-table">
+                              <IonButton color="success" className="btn-action-table" routerLink={`/admin/solicitudes/${sol.id}`}>
                                 {sol.accion}
                               </IonButton>
                             )}
-                            <IonButton fill="outline" color="medium" className="btn-more">
+                            <IonButton fill="outline" color="medium" className="btn-more" routerLink={`/admin/solicitudes/${sol.id}`}>
                               <IonIcon icon={ellipsisHorizontal} />
                             </IonButton>
                           </div>
@@ -174,47 +147,33 @@ const SolicitudesAdmin: React.FC = () => {
               {/* --- VISTA MÓVIL: TARJETAS --- */}
               <div className="mobile-cards-container">
                 <div className="mobile-tabs">
-                  <button className="mobile-tab active">Pendientes</button>
-                  <button className="mobile-tab">En revisión</button>
-                  <button className="mobile-tab">Cerradas</button>
-                </div>
-                
-                <div className="mobile-card">
-                  <div className="mobile-card-header">
-                    <div className="postulante-cell">
-                      <div className="avatar" style={{ backgroundColor: '#fef0c7', color: '#b45309' }}>TG</div>
-                      <div>
-                        <div className="postulante-nombre">Tomás Guerra</div>
-                        <div className="postulante-rut">Postula por Milo - hace 2 h</div>
-                      </div>
-                    </div>
-                    <span className="badge estado-pendiente">PENDIENTE</span>
-                  </div>
-                  <p className="mobile-card-detail">Vivienda: departamento - sin mascotas</p>
-                  <div className="mobile-card-actions">
-                    <IonButton color="success" expand="block" className="btn-action-mobile">Pasar a revisión</IonButton>
-                    <IonButton fill="outline" color="dark" expand="block" className="btn-action-mobile">Ver ficha</IonButton>
-                  </div>
+                  {(['Pendientes', 'En revisión', 'Cerradas'] as const).map((tab) => (
+                    <button key={tab} className={`mobile-tab ${tabMovil === tab ? 'active' : ''}`} onClick={() => setTabMovil(tab)}>{tab}</button>
+                  ))}
                 </div>
 
-                <div className="mobile-card">
-                  <div className="mobile-card-header">
-                    <div className="postulante-cell">
-                      <div className="avatar" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>CM</div>
-                      <div>
-                        <div className="postulante-nombre">Camila Morales</div>
-                        <div className="postulante-rut">Luna - cumple requisitos</div>
+                {solicitudesMovil.length === 0 && <p className="mobile-card-detail">No hay solicitudes en esta pestaña.</p>}
+
+                {solicitudesMovil.map((sol) => (
+                  <div className="mobile-card" key={sol.id}>
+                    <div className="mobile-card-header">
+                      <div className="postulante-cell">
+                        <div className="avatar" style={{ backgroundColor: sol.colorAvatar, color: sol.colorTexto }}>{sol.iniciales}</div>
+                        <div>
+                          <div className="postulante-nombre">{sol.nombre}</div>
+                          <div className="postulante-rut">Postula por {sol.animal} - {sol.fecha}</div>
+                        </div>
                       </div>
+                      <span className={`badge ${sol.estadoClase}`}>{sol.estado}</span>
                     </div>
-                    <span className="badge estado-revision">EN REVISIÓN</span>
+                    <p className="mobile-card-detail">{sol.rut} - contacto protegido</p>
+                    <div className="mobile-card-actions">
+                      <IonButton color="success" expand="block" className="btn-action-mobile" routerLink={sol.accion === 'Ver agenda' ? '/admin/agenda' : `/admin/solicitudes/${sol.id}`}>{sol.accion}</IonButton>
+                      <IonButton fill="outline" color="dark" expand="block" className="btn-action-mobile" routerLink={`/admin/solicitudes/${sol.id}`}>Ver ficha</IonButton>
+                    </div>
                   </div>
-                  <p className="mobile-card-detail">RUT •• 456.789-0 - contacto protegido</p>
-                  <div className="mobile-card-actions">
-                    <IonButton color="success" expand="block" className="btn-action-mobile">Preseleccionar</IonButton>
-                    <IonButton fill="outline" color="dark" expand="block" className="btn-action-mobile">Ver ficha</IonButton>
-                  </div>
-                </div>
-                
+                ))}
+
                 <div className="mobile-info-box">
                   <strong>Preseleccionar no aprueba la adopción</strong>
                   <p>Preselección → Horario → Entrevista → Resultado</p>
@@ -231,26 +190,9 @@ const SolicitudesAdmin: React.FC = () => {
           </IonRow>
         </IonGrid>
 
-        {/* --- BARRA INFERIOR MÓVIL ADMIN --- */}
-        <div className="admin-mobile-nav">
-          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
-            <IonIcon icon={gridOutline} />
-            <span>Resumen</span>
-          </div>
-          <div className="admin-nav-item-mobile active" onClick={() => navigate('/admin/solicitudes')} style={{ cursor: 'pointer' }}>
-            <IonIcon icon={documentTextOutline} />
-            <span>Solicitudes</span>
-          </div>
-          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/animales')} style={{ cursor: 'pointer' }}>
-            <IonIcon icon={pawOutline} />
-            <span>Animales</span>
-          </div>
-          <div className="admin-nav-item-mobile" onClick={() => navigate('/admin/agenda')} style={{ cursor: 'pointer' }}>
-            <IonIcon icon={personOutline} />
-            <span>Agenda</span>
-          </div>
-        </div>
+        <IonToast isOpen={mensaje !== ''} message={mensaje} duration={2500} onDidDismiss={() => setMensaje('')} />
       </IonContent>
+      <BarraInferiorAdmin activo="/admin/solicitudes" />
     </IonPage>
   );
 };

@@ -1,36 +1,39 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonInput, IonButton, IonText, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonInputPasswordToggle } from '@ionic/react';
-import { useNavigate } from 'react-router-dom';
+import { IonPage, IonContent, IonInput, IonButton, IonText, IonItem, IonLabel, IonGrid, IonRow, IonCol, IonInputPasswordToggle, IonRouterLink, useIonRouter } from '@ionic/react';
+import { useLocation } from 'react-router-dom';
+import { iniciarSesion, rutaInicioPorRol } from '../../services/authService';
 import './Login.css'; 
 
 const Login: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useIonRouter();
+  const location = useLocation();
+  const destino = (location.state as { from?: string } | null)?.from;
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault(); 
 
     if (!email || !password) {
-      alert('Por favor, ingresa tu correo y contraseña para continuar.');
+      setError('Ingresa tu correo y contraseña para continuar.');
       return;
     }
 
-    // Definimos qué correo activa el rol de administrador
-    const ADMIN_EMAIL = 'admin@patitasgo.cl'; 
-    const roleType = email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Ingresa un correo válido, por ejemplo nombre@correo.cl.');
+      return;
+    }
 
+    setError('');
+
+    // Definimos qué correo activa el rol de administrador
     // Guardamos la sesión y el rol detectado automáticamente en el navegador
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userRole', roleType);
+    const roleType = iniciarSesion(email);
 
     // Redirección inteligente según el correo ingresado
-    if (roleType === 'admin') {
-      navigate('/admin/solicitudes');
-    } else {
-      navigate('/catalogo');
-    }
+    router.push(destino && roleType === 'user' ? destino : rutaInicioPorRol(roleType), 'root', 'replace');
   };
 
   return (
@@ -106,16 +109,22 @@ const Login: React.FC = () => {
                   </IonItem>
 
                   <div className="forgot-password">
-                    <a href="#">¿Olvidaste tu contraseña?</a>
+                    <IonRouterLink routerLink="/recuperar">¿Olvidaste tu contraseña?</IonRouterLink>
                   </div>
+
+                  {error && (
+                    <IonText color="danger">
+                      <p style={{ fontSize: '0.85rem' }}>{error}</p>
+                    </IonText>
+                  )}
 
                   {/* Único botón de ingresar limpio */}
                   <IonButton type="submit" expand="block" color="success" className="btn-ingresar">
                     Ingresar
                   </IonButton>
 
-                  <IonButton expand="block" fill="outline" color="dark" className="btn-google" style={{ marginTop: '10px' }}>
-                    Continuar con Google
+                  <IonButton expand="block" fill="outline" color="dark" className="btn-google" style={{ marginTop: '10px' }} disabled>
+                    Continuar con Google (próximamente)
                   </IonButton>
 
                   <div className="ion-text-center register-link">

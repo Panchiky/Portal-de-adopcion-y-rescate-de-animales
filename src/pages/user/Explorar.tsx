@@ -1,85 +1,51 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonInput, IonButton, IonIcon } from '@ionic/react';
-import { searchOutline, documentTextOutline, notificationsOutline, personOutline, heart } from 'ionicons/icons';
+import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonInput, IonButton, IonIcon, IonToast, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonList, IonItem, IonSelect, IonSelectOption, useIonRouter } from '@ionic/react';
+import { heart } from 'ionicons/icons';
+import { obtenerAnimales, alternarFavorito } from '../../services/animalesService';
+import { estaAutenticado } from '../../services/authService';
+import { MenuLateralUsuario, BarraInferiorUsuario } from '../../components/MenuUsuario';
 import './Explorar.css';
 
-interface Animal {
-  id: number;
-  name: string;
-  species: string;
-  gender: string;
-  age: string;
-  size: string;
-  status: string;
-  tags: string[];
-  description: string;
-  shelter: string;
-  location: string;
-  distance: string;
-  health: string;
-  image: string;
-}
-
-const ANIMALS_DATA: Animal[] = [
-  {
-    id: 1,
-    name: "Milo",
-    species: "Gato mestizo",
-    gender: "Macho",
-    age: "2 años",
-    size: "Mediano",
-    status: "DISPONIBLE",
-    tags: ["Sociable", "Tranquilo", "Energía media"],
-    description: "Compañero sociable que disfruta las siestas al sol y busca un hogar estable y amoroso.",
-    shelter: "Huellas Felices",
-    location: "Valparaíso",
-    distance: "a 14 km",
-    health: "Salud: vacunas, desparasitación y esterilización al día.",
-    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: 2,
-    name: "Luna",
-    species: "Gato naranja",
-    gender: "Hembra",
-    age: "4 años",
-    size: "Mediano",
-    status: "DISPONIBLE",
-    tags: ["Juguetona", "Cariñosa", "Curiosa"],
-    description: "Una gata llena de energía que adora jugar con juguetes colgantes y recibir mimos en la barbilla.",
-    shelter: "Refugio Patitas",
-    location: "Viña del Mar",
-    distance: "a 18 km",
-    health: "Salud: esterilizada, vacunas al día y test negativo.",
-    image: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: 3,
-    name: "Rocky",
-    species: "Perro mestizo",
-    gender: "Macho",
-    age: "1 año",
-    size: "Grande",
-    status: "DISPONIBLE",
-    tags: ["Muy activo", "Fiel", "Protector"],
-    description: "Rocky es un cachorro grande con mucha energía, ideal para personas activas que disfruten salir a correr.",
-    shelter: "Amigos Peludos",
-    location: "Limache",
-    distance: "a 5 km",
-    health: "Salud: vacunado y desparasitado.",
-    image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-  }
-];
+const ANIMALS_DATA = obtenerAnimales();
 
 const Explorar: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [mensaje, setMensaje] = useState('');
+  const [busqueda, setBusqueda] = useState('');
+  const [especie, setEspecie] = useState('TODAS');
+  const [tamano, setTamano] = useState('TODOS');
+  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
+  const router = useIonRouter();
+
+  const texto = busqueda.trim().toLowerCase();
+  const animalesFiltrados = ANIMALS_DATA.filter((a) =>
+    (texto === '' || `${a.name} ${a.species} ${a.shelter}`.toLowerCase().includes(texto)) &&
+    (especie === 'TODAS' || a.species.toUpperCase().startsWith(especie)) &&
+    (tamano === 'TODOS' || a.size.toUpperCase() === tamano)
+  );
+  const indice = animalesFiltrados.length > 0 ? currentIndex % animalesFiltrados.length : 0;
 
   // Animal actual y siguiente (usando operador módulo para hacer un ciclo infinito)
-  const currentAnimal = ANIMALS_DATA[currentIndex];
-  const nextAnimal = ANIMALS_DATA[(currentIndex + 1) % ANIMALS_DATA.length];
+  const currentAnimal = animalesFiltrados[indice];
+  const nextAnimal = animalesFiltrados[(indice + 1) % animalesFiltrados.length];
 
   const handleNextAnimal = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % ANIMALS_DATA.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % animalesFiltrados.length);
+  };
+
+  const limpiarFiltros = () => {
+    setEspecie('TODAS');
+    setTamano('TODOS');
+    setBusqueda('');
+  };
+
+  const handleFavorito = () => {
+    if (!estaAutenticado()) {
+      router.push('/login');
+      return;
+    }
+    const agregado = alternarFavorito(currentAnimal.id);
+    setMensaje(agregado ? `${currentAnimal.name} se agregó a tus favoritos` : `${currentAnimal.name} se quitó de tus favoritos`);
   };
 
   return (
@@ -90,39 +56,7 @@ const Explorar: React.FC = () => {
             
             {/* --- BARRA LATERAL (Desktop) --- */}
             <IonCol size="12" sizeMd="3" sizeLg="2.5" className="sidebar">
-              <div className="sidebar-header">
-                <div className="logo">
-                  <span className="dot"></span> PatitasGo
-                </div>
-                <span className="logo-subtitle">ADOPCIÓN Y RESCATE</span>
-              </div>
-
-              <div className="nav-menu">
-                <div className="nav-item active">
-                  <IonIcon icon={searchOutline} />
-                  <span>Explorar</span>
-                </div>
-                <div className="nav-item">
-                  <IonIcon icon={documentTextOutline} />
-                  <span>Postulaciones</span>
-                </div>
-                <div className="nav-item">
-                  <IonIcon icon={notificationsOutline} />
-                  <span>Alertas</span>
-                </div>
-                <div className="nav-item">
-                  <IonIcon icon={personOutline} />
-                  <span>Perfil</span>
-                </div>
-              </div>
-
-              <div className="help-box">
-                <h4>¿Necesitas ayuda?</h4>
-                <p>Revisa preguntas frecuentes o contacta al refugio.</p>
-                <IonButton expand="block" color="light" className="btn-help">
-                  Centro de ayuda
-                </IonButton>
-              </div>
+              <MenuLateralUsuario activo="/catalogo" />
             </IonCol>
 
             {/* --- CONTENIDO PRINCIPAL --- */}
@@ -135,20 +69,27 @@ const Explorar: React.FC = () => {
                     <p className="page-subtitle">Ficha completa y una siguiente opción, sin gestos de rechazo.</p>
                   </div>
                   <div className="location-badge">
-                    {ANIMALS_DATA.length} animales • 25 km
+                    {animalesFiltrados.length} animales • 25 km
                   </div>
                 </div>
 
                 <div className="search-filter-container">
                   <div className="search-bar">
-                    <IonInput placeholder="Buscar por nombre, especie o refugio"></IonInput>
+                    <IonInput placeholder="Buscar por nombre, especie o refugio" value={busqueda} onIonInput={(e) => { setBusqueda(e.detail.value ?? ''); setCurrentIndex(0); }} clearInput></IonInput>
                   </div>
-                  <IonButton fill="outline" color="dark" className="btn-filter">
+                  <IonButton fill="outline" color="dark" className="btn-filter" onClick={() => setFiltrosAbiertos(true)}>
                     Filtros
                   </IonButton>
                 </div>
               </div>
 
+              {animalesFiltrados.length === 0 ? (
+                <div className="ion-text-center ion-padding">
+                  <h2>No hay animales con esos criterios</h2>
+                  <p className="text-muted">Prueba con otra búsqueda o limpia los filtros.</p>
+                  <IonButton color="success" onClick={limpiarFiltros}>Limpiar filtros</IonButton>
+                </div>
+              ) : (
               <div className="cards-layout">
                 
                 {/* --- TARJETA PRINCIPAL DINÁMICA --- */}
@@ -185,11 +126,11 @@ const Explorar: React.FC = () => {
                     </IonButton>
 
                     <div className="action-buttons">
-                      <IonButton fill="outline" color="dark" className="btn-secondary">
+                      <IonButton fill="outline" color="dark" className="btn-secondary" onClick={handleFavorito}>
                         <IonIcon icon={heart} color="danger" slot="start" />
                         Añadir a favoritos
                       </IonButton>
-                      <IonButton fill="outline" color="dark" className="btn-secondary">
+                      <IonButton fill="outline" color="dark" className="btn-secondary" routerLink={`/animales/${currentAnimal.id}/apadrinar`}>
                         Apadrinar
                       </IonButton>
                     </div>
@@ -209,39 +150,54 @@ const Explorar: React.FC = () => {
                     <p className="animal-stats-small">{nextAnimal.species} • {nextAnimal.gender} • {nextAnimal.age}</p>
                     <p className="text-muted-small">{nextAnimal.shelter} • {nextAnimal.location} • {nextAnimal.distance}</p>
                     
-                    <IonButton expand="block" fill="outline" color="dark" className="btn-ver-ficha" onClick={(e) => { e.stopPropagation(); handleNextAnimal(); }}>
+                    <IonButton expand="block" fill="outline" color="dark" className="btn-ver-ficha" onClick={(e) => { e.stopPropagation(); router.push(`/animales/${nextAnimal.id}`); }}>
                       Ver ficha de {nextAnimal.name} →
                     </IonButton>
                   </div>
                 </div>
 
               </div>
+              )}
             </IonCol>
 
           </IonRow>
         </IonGrid>
 
-        {/* --- BARRA DE NAVEGACIÓN INFERIOR (Solo para móviles) --- */}
-        <div className="mobile-bottom-nav">
-          <div className="nav-item-mobile active">
-            <IonIcon icon={searchOutline} />
-            <span>Explorar</span>
-          </div>
-          <div className="nav-item-mobile">
-            <IonIcon icon={documentTextOutline} />
-            <span>Postulaciones</span>
-          </div>
-          <div className="nav-item-mobile">
-            <IonIcon icon={notificationsOutline} />
-            <span>Alertas</span>
-          </div>
-          <div className="nav-item-mobile">
-            <IonIcon icon={personOutline} />
-            <span>Perfil</span>
-          </div>
-        </div>
 
+        <IonModal isOpen={filtrosAbiertos} onDidDismiss={() => setFiltrosAbiertos(false)} initialBreakpoint={0.6} breakpoints={[0, 0.6, 1]}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Filtros</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setFiltrosAbiertos(false)}>Listo</IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <IonList>
+              <IonItem>
+                <IonSelect label="Especie" value={especie} onIonChange={(e) => { setEspecie(e.detail.value); setCurrentIndex(0); }}>
+                  <IonSelectOption value="TODAS">Todas</IonSelectOption>
+                  <IonSelectOption value="PERRO">Perro</IonSelectOption>
+                  <IonSelectOption value="GATO">Gato</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+              <IonItem>
+                <IonSelect label="Tamaño" value={tamano} onIonChange={(e) => { setTamano(e.detail.value); setCurrentIndex(0); }}>
+                  <IonSelectOption value="TODOS">Todos</IonSelectOption>
+                  <IonSelectOption value="PEQUEÑO">Pequeño</IonSelectOption>
+                  <IonSelectOption value="MEDIANO">Mediano</IonSelectOption>
+                  <IonSelectOption value="GRANDE">Grande</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+            </IonList>
+            <IonButton expand="block" fill="outline" color="dark" onClick={limpiarFiltros}>Limpiar filtros</IonButton>
+          </IonContent>
+        </IonModal>
+
+        <IonToast isOpen={mensaje !== ''} message={mensaje} duration={2000} onDidDismiss={() => setMensaje('')} />
       </IonContent>
+      <BarraInferiorUsuario activo="/catalogo" />
     </IonPage>
   );
 };

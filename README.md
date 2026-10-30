@@ -6,18 +6,111 @@
 - Kevin Rubilar
 
 ## Índice
-1. [Justificación del problema](#justificación-del-problema)
-2. [Usuarios](#usuarios-objetivo-quién-usará-la-aplicación)
+1. [Descripción general y objetivos](#descripción-general-del-sistema)
+    - [Distribución de responsabilidades](#distribución-de-responsabilidades)
+    - [Instalación y ejecución](#instalación-y-ejecución)
+2. [Justificación del problema](#justificación-del-problema)
+3. [Usuarios](#usuarios-objetivo-quién-usará-la-aplicación)
     - [Roles](#roles-del-sistema)
     - [Proto-personas](#proto-personas)
-3. [Requerimientos](#requerimientos)
-4. [Arquitectura de la Información/UX](#arquitectura-de-navegación)
+4. [Requerimientos](#requerimientos)
+5. [Arquitectura de la Información/UX](#arquitectura-de-navegación)
     - [Diferenciación por roles](#diferenciación-de-acceso-según-roles)
     - [Flujos principales de tareas](#flujos-de-tareas)
     - [Puntos críticos de interacción](#puntos-críticos-de-interacción)
     - [Justificación técnica](#justificación-técnica)
-5. [Bocetos UX/UI](#bocetos-uiux)
-6. [Frontend con Ionic-React](#librerías-usadas-con-react-ionic)
+6. [Bocetos UX/UI](#bocetos-uiux)
+7. [Credenciales de prueba](#credenciales-de-prueba-para-evaluación)
+8. [Librerías y tecnologías](#librerías-usadas-con-react-ionic)
+
+## Descripción general del sistema
+
+**PatitasGo** es un portal web y una aplicación móvil para la adopción y el rescate de animales. Reúne en un solo lugar las fichas de los animales rescatados, la búsqueda con filtros, el envío y seguimiento de postulaciones y la gestión de solicitudes por parte de los refugios. El frontend está construido con **Ionic + React + TypeScript** y se adapta a celulares y computadores.
+
+### Objetivos del proyecto
+
+- **Objetivo general:** centralizar el proceso de adopción responsable entre personas interesadas y refugios, reduciendo la dispersión de información en redes sociales.
+- **Objetivos específicos:**
+  - Permitir explorar animales disponibles con filtros por especie, tamaño y ubicación.
+  - Ofrecer un proceso de postulación guiado en tres pasos, con seguimiento de su estado.
+  - Entregar al refugio un panel para revisar solicitudes, gestionar fichas y coordinar entrevistas.
+  - Proteger los datos personales de los postulantes y mostrar solo la información necesaria a cada rol.
+
+### Principales funcionalidades
+
+| Rol | Funcionalidades |
+|---|---|
+| Visitante | Ver el inicio, los refugios, el catálogo de animales y la ficha de cada animal. |
+| Usuario | Postular a un animal, revisar sus postulaciones y alertas, guardar favoritos, apadrinar y gestionar su perfil. |
+| Administrador | Ver el resumen del refugio, revisar y cambiar el estado de solicitudes, gestionar animales, crear fichas y consultar la agenda de entrevistas. |
+
+El detalle de cada funcionalidad está en [Requerimientos](#requerimientos).
+
+---
+
+## Distribución de responsabilidades
+
+| Integrante | Responsabilidades |
+|---|---|
+| Francisca Ponce | Estructura inicial del proyecto Ionic + React, pantallas de autenticación, Explorar, Postular y panel administrativo (Solicitudes, Animales y Agenda). |
+| Kevin Rubilar | Documentación del README: requerimientos, flujos de tareas, arquitectura de navegación, credenciales de prueba y correcciones de la EP1. |
+| Elías Bravo | Integración de archivos del frontend y configuración de rutas en `App.tsx`. |
+| Tomás Guerra | Diseño UI/UX en Figma: pantallas móvil y web, coherencia visual, prototipo navegable con sus flujos y corrección del Figma según la retroalimentación de la EP1. |
+
+---
+
+## Instalación y ejecución
+
+### Requisitos
+
+- [Node.js](https://nodejs.org/) 20 o superior (incluye `npm`).
+- [Git](https://git-scm.com/).
+- Opcional: [Ionic CLI](https://ionicframework.com/docs/cli) (`npm install -g @ionic/cli`) para usar `ionic serve`.
+
+### Instalación
+
+```bash
+git clone https://github.com/Panchiky/Portal-de-adopcion-y-rescate-de-animales.git
+cd Portal-de-adopcion-y-rescate-de-animales
+git checkout frontend
+npm install
+```
+
+### Ejecución
+
+```bash
+npm run dev
+```
+
+La aplicación queda disponible en `http://localhost:5173`. Para ver la versión móvil, abre las herramientas de desarrollador del navegador (F12) y activa la vista de dispositivo.
+
+Otros comandos disponibles:
+
+| Comando | Uso |
+|---|---|
+| `npm run build` | Genera la versión de producción en la carpeta `dist/` y verifica que el proyecto compile. |
+| `npm run preview` | Sirve localmente la versión generada con `npm run build`. |
+| `npm run lint` | Revisa el estilo del código con ESLint. |
+
+### Uso
+
+1. En la página de inicio, entra a **Adopta** para ver el catálogo sin iniciar sesión.
+2. Para postular, guardar favoritos o apadrinar, inicia sesión con las [credenciales de prueba](#credenciales-de-prueba-para-evaluación).
+3. Con el correo de administrador, la aplicación abre el **Resumen** del refugio.
+
+### Estructura del proyecto
+
+```text
+src/
+├── components/   Componentes reutilizables (menús, barras de navegación, tarjeta de animal)
+├── pages/        Vistas agrupadas por rol: auth, home, user y admin
+├── routes/       ProtectedRoute: control de sesión y rol
+├── services/     Acceso a datos (en esta etapa, datos de ejemplo)
+├── theme/        Variables de estilo
+└── App.tsx       Definición de rutas públicas y protegidas
+```
+
+---
 
 ## Justificación del problema
 El abandono de animales de compañía constituye una problemática que afecta su bienestar, incrementa la presencia de animales sin supervisión en espacios públicos y exige una respuesta permanente de municipalidades, fundaciones, refugios y rescatistas independientes. La legislación chilena reconoce expresamente la necesidad de prevenir el abandono, promover la reubicación y fomentar la tenencia responsable de mascotas y animales de compañía.
@@ -46,7 +139,7 @@ La plataforma no pretende reemplazar la evaluación realizada por el refugio ni 
 La caracterización inicial del problema se apoya en fuentes secundarias oficiales:
 
 - [Ley N.º 21.020 sobre Tenencia Responsable de Mascotas y Animales de Compañía](https://www.bcn.cl/leychile/Navegar?idNorma=1106037), Biblioteca del Congreso Nacional de Chile.
-- [Programa de Tenencia Responsable de Animales de Compañía](https://www.subdere.gov.cl/), Subsecretaría de Desarrollo Regional y Administrativo.
+- [Programa de Tenencia Responsable de Animales de Compañía (PTRAC)](https://www.subdere.gov.cl/node/83463), Subsecretaría de Desarrollo Regional y Administrativo.
 - [Web Content Accessibility Guidelines (WCAG) 2.2](https://www.w3.org/TR/WCAG22/), World Wide Web Consortium.
 
 ---
@@ -467,50 +560,57 @@ Los siguientes son los **cinco RNF principales y evaluables** de EP 1.1. Los cri
 
 ### 1. Rutas principales y secundarias
 
-La aplicación considera rutas públicas y rutas protegidas. Las rutas protegidas deberán comprobar la sesión y el rol tanto en el frontend como en el backend.
+La aplicación considera rutas públicas y rutas protegidas. Las rutas protegidas comprueban la sesión y el rol en el frontend mediante `ProtectedRoute` (`src/routes/ProtectedRoute.tsx`); al integrar la API, el backend repetirá esta comprobación. Si una persona sin sesión intenta entrar a una ruta protegida, se redirige a `/login` y, tras iniciar sesión, vuelve a la vista que intentaba abrir.
+
+La columna **Estado** indica si la ruta ya está implementada en el frontend o si se incorporará en la Entrega Parcial 2, junto con el backend.
 
 #### Rutas públicas
 
-| Ruta | Vista | Descripción |
-|---|---|---|
-| `/login` | Inicio de sesión | Permite ingresar mediante credenciales y redirige a la experiencia correspondiente al rol. |
-| `/registro` | Registro | Permite crear una cuenta con rol Usuario. |
-| `/catalogo` | Explorar animales | Presenta animales disponibles, nombre y ubicación general del refugio, selector de ubicación y filtros por radio. |
-| `/animales/:id` | Detalle del animal | Presenta la ficha pública, información sanitaria autorizada, refugio responsable, comuna, región, distancia aproximada y acciones disponibles. |
+| Ruta | Vista | Descripción | Estado |
+|---|---|---|---|
+| `/` | Inicio | Presenta la propuesta de PatitasGo y accesos a Adopta, Refugios, inicio de sesión y registro. | Implementada |
+| `/login` | Inicio de sesión | Permite ingresar mediante credenciales y redirige a la experiencia correspondiente al rol. | Implementada |
+| `/registro` | Registro | Permite crear una cuenta con rol Usuario. | Implementada |
+| `/recuperar` | Recuperar contraseña | Permite solicitar un enlace temporal para restablecer la contraseña. | Implementada |
+| `/refugios` | Refugios y organizaciones | Presenta los refugios que publican animales, su comuna y cuántos animales tienen disponibles. | Implementada |
+| `/catalogo` | Explorar animales | Presenta animales disponibles, nombre y ubicación general del refugio, selector de ubicación y filtros por radio. | Implementada |
+| `/animales/:id` | Detalle del animal | Presenta la ficha pública, información sanitaria autorizada, refugio responsable, comuna, región, distancia aproximada y acciones disponibles. | Implementada |
 
 #### Rutas protegidas del Usuario
 
-| Ruta | Vista | Descripción |
-|---|---|---|
-| `/animales/:id/postular` | Formulario de postulación | Permite completar Datos, Motivación y Confirmación. |
-| `/usuario/postulaciones` | Mis postulaciones | Presenta las solicitudes propias y su estado actual. |
-| `/usuario/postulaciones/:id` | Detalle de postulación | Presenta el seguimiento de una solicitud propia. |
-| `/usuario/postulaciones/:id/coordinar` | Coordinación de entrevista | Permite al Usuario con postulación aceptada en proceso consultar si la cita está por confirmar, confirmada o requiere otro horario, y responder a la propuesta. |
-| `/usuario/postulaciones/:id/entrevista` | Entrevista confirmada | Presenta el resumen de una cita confirmada con animal, refugio, fecha, hora, modalidad, lugar e instrucciones autorizadas. |
-| `/animales/:id/apadrinar` | Apadrinar | Permite seleccionar frecuencia y monto antes de continuar al proveedor de pago. |
-| `/usuario/apadrinamientos` | Mis apadrinamientos | Presenta aportes confirmados y renovaciones mensuales propias. |
-| `/usuario/alertas` | Alertas | Presenta las notificaciones de la cuenta; las notificaciones accionables permiten acceder directamente a la postulación, coordinación o entrevista relacionada. |
-| `/usuario/perfil` | Perfil | Presenta los datos básicos y accesos a favoritos, edición de información, contraseña, apariencia, privacidad y cierre de sesión. |
-| `/usuario/favoritos` | Mis favoritos | Presenta los animales guardados por el Usuario sin crear una postulación. |
-| `/usuario/perfil/editar` | Editar información | Permite actualizar datos personales editables de la cuenta. |
-| `/usuario/perfil/contrasena` | Cambiar contraseña | Permite modificar la contraseña desde una sesión autenticada mediante validaciones de seguridad. |
-| `/usuario/perfil/apariencia` | Apariencia | Permite seleccionar y conservar preferencias visuales disponibles de la interfaz. |
-| `/usuario/perfil/privacidad` | Privacidad de datos | Informa qué datos personales utiliza PatitasGo, sus finalidades y las opciones de gestión disponibles para la cuenta. |
+| Ruta | Vista | Descripción | Estado |
+|---|---|---|---|
+| `/animales/:id/postular` | Formulario de postulación | Permite completar Datos, Motivación y Confirmación. | Implementada |
+| `/animales/:id/postulacion-enviada` | Postulación enviada | Confirma el envío de la postulación y su estado inicial `PENDIENTE`. | Implementada |
+| `/usuario/postulaciones` | Mis postulaciones | Presenta las solicitudes propias y su estado actual. | Implementada |
+| `/usuario/postulaciones/:id` | Detalle de postulación | Presenta el seguimiento de una solicitud propia. | Implementada |
+| `/usuario/postulaciones/:id/coordinar` | Coordinación de entrevista | Permite al Usuario con postulación aceptada en proceso consultar si la cita está por confirmar, confirmada o requiere otro horario, y responder a la propuesta. | Planificada (EP2) |
+| `/usuario/postulaciones/:id/entrevista` | Entrevista confirmada | Presenta el resumen de una cita confirmada con animal, refugio, fecha, hora, modalidad, lugar e instrucciones autorizadas. | Planificada (EP2) |
+| `/animales/:id/apadrinar` | Apadrinar | Permite seleccionar frecuencia y monto antes de continuar al proveedor de pago. | Implementada |
+| `/usuario/apadrinamientos` | Mis apadrinamientos | Presenta aportes confirmados y renovaciones mensuales propias. | Planificada (EP2) |
+| `/usuario/alertas` | Alertas | Presenta las notificaciones de la cuenta; las notificaciones accionables permiten acceder directamente a la postulación, coordinación o entrevista relacionada. | Implementada |
+| `/usuario/perfil` | Perfil | Presenta los datos básicos y accesos a favoritos, edición de información, contraseña, apariencia, privacidad y cierre de sesión. | Implementada |
+| `/usuario/favoritos` | Mis favoritos | Presenta los animales guardados por el Usuario sin crear una postulación. | Implementada |
+| `/usuario/perfil/editar` | Editar información | Permite actualizar datos personales editables de la cuenta. | Planificada (EP2) |
+| `/usuario/perfil/contrasena` | Cambiar contraseña | Permite modificar la contraseña desde una sesión autenticada mediante validaciones de seguridad. | Planificada (EP2) |
+| `/usuario/perfil/apariencia` | Apariencia | Permite seleccionar y conservar preferencias visuales disponibles de la interfaz. | Planificada (EP2) |
+| `/usuario/perfil/privacidad` | Privacidad de datos | Informa qué datos personales utiliza PatitasGo, sus finalidades y las opciones de gestión disponibles para la cuenta. | Planificada (EP2) |
 
 #### Rutas protegidas del Administrador
 
-| Ruta | Vista | Descripción |
-|---|---|---|
-| `/admin/resumen` | Resumen | Presenta indicadores operativos y accesos a tareas frecuentes. |
-| `/admin/postulaciones` | Gestión de solicitudes | Permite listar y filtrar las postulaciones recibidas. |
-| `/admin/postulaciones/:id` | Detalle de solicitud | Permite revisar respuestas y efectuar una transición válida. |
-| `/admin/postulaciones/:id/coordinar` | Coordinación, entrevista y cierre | Permite confirmar o proponer horario, registrar asistencia y resultado, verificar la identidad y cerrar la adopción o liberar al animal. |
-| `/admin/animales` | Gestión de animales | Permite consultar y mantener las fichas del refugio. |
-| `/admin/animales/nuevo` | Nueva ficha | Permite registrar un animal en estado borrador. |
-| `/admin/animales/:id/editar` | Editar ficha | Permite modificar, publicar o archivar una ficha existente. |
-| `/admin/animales/:id/salud` | Historial médico | Permite consultar y registrar eventos médicos. |
-| `/admin/apadrinamientos` | Aportes confirmados | Permite consultar los aportes asociados a animales del refugio. |
-| `/admin/perfil` | Perfil administrativo | Presenta los datos de cuenta y la opción de cerrar sesión. |
+| Ruta | Vista | Descripción | Estado |
+|---|---|---|---|
+| `/admin/resumen` | Resumen | Presenta indicadores operativos y accesos a tareas frecuentes. | Implementada |
+| `/admin/solicitudes` | Gestión de solicitudes | Permite listar y filtrar las postulaciones recibidas. | Implementada |
+| `/admin/solicitudes/:id` | Detalle de solicitud | Permite revisar respuestas y efectuar una transición válida. | Implementada |
+| `/admin/solicitudes/:id/coordinar` | Coordinación, entrevista y cierre | Permite confirmar o proponer horario, registrar asistencia y resultado, verificar la identidad y cerrar la adopción o liberar al animal. | Planificada (EP2) |
+| `/admin/agenda` | Agenda | Presenta las entrevistas del refugio por día, con días anteriores y próximos. | Implementada |
+| `/admin/animales` | Gestión de animales | Permite consultar y mantener las fichas del refugio. | Implementada |
+| `/admin/animales/nuevo` | Nueva ficha | Permite registrar un animal en estado borrador. | Implementada |
+| `/admin/animales/:id/editar` | Editar ficha | Permite modificar, publicar o archivar una ficha existente. | Planificada (EP2) |
+| `/admin/animales/:id/salud` | Historial médico | Permite consultar y registrar eventos médicos. | Planificada (EP2) |
+| `/admin/apadrinamientos` | Aportes confirmados | Permite consultar los aportes asociados a animales del refugio. | Planificada (EP2) |
+| `/admin/perfil` | Perfil administrativo | Presenta los datos de cuenta y la opción de cerrar sesión. | Implementada |
 
 ### 2. Relaciones jerárquicas entre vistas
 
@@ -749,9 +849,9 @@ Por ejemplo:
 
 /admin/resumen
 
-/admin/postulaciones
+/admin/solicitudes
 
-/admin/postulaciones/:id/coordinar
+/admin/solicitudes/:id/coordinar
 
 /admin/animales
 
@@ -1165,16 +1265,55 @@ Rutas protegidas
 
 La separación también simplifica el enrutamiento con `IonReactRouter`, la implementación de guardas de ruta y la validación de permisos en los controladores de Express.js. La autorización definitiva deberá permanecer en el backend.
 
+### Escalabilidad
+
+La arquitectura frontend se organiza para crecer sin reestructurar la navegación existente:
+
+- **Rutas agrupadas por rol.** Las vistas protegidas se agrupan bajo prefijos (`/usuario/*` y `/admin/*`). Una nueva funcionalidad se incorpora como ruta secundaria de su grupo sin modificar la navegación principal (Explorar, Postulaciones, Alertas y Perfil para el Usuario; Resumen, Solicitudes, Animales y Perfil para el Administrador).
+- **Guardia de rutas reutilizable.** `ProtectedRoute` recibe el rol permitido como parámetro, por lo que proteger una vista nueva o incorporar un rol adicional no requiere duplicar lógica de acceso.
+- **Separación por capas.** El código se divide en `pages` (vistas), `components` (elementos reutilizables como la tarjeta de animal y la barra de navegación), `routes` (control de acceso) y `services` (acceso a datos). Las vistas no dependen de dónde provienen los datos: en esta etapa los servicios entregan datos de ejemplo y en la integración con la API REST de Express.js solo se reemplaza su implementación.
+- **Navegación adaptable por dispositivo.** La misma estructura de rutas se presenta con barra inferior en móvil y menú lateral en web, de modo que una vista nueva queda disponible en ambas versiones al registrarse una sola vez.
+- **Estados centralizados.** Los estados de postulación, cita y animal se definen como valores fijos y compartidos, lo que permite agregar nuevos estados o transiciones sin modificar cada vista que los muestra.
+
 ---
 
 ## Bocetos UI/UX
 
-La entrega deberá incorporar aquí el enlace público al archivo de Figma construido manualmente por el equipo, con versiones móvil y web y conexiones de prototipado.
+El prototipo fue construido manualmente por el equipo en Figma, con versiones móvil y web y conexiones de prototipado entre pantallas.
 
-- **Enlace al prototipo manual evaluable:** [Ver prototipo EP 1.3 de PatitasGo en Figma](https://www.figma.com/design/5zoQ54KdMQRZyJKPDWX6cI/EP1.3-PatigasGo?node-id=0-1&t=L9dP58QNvqlk4Q2d-1)
+- **Prototipo navegable:** [Ver prototipo EP 1.3 de PatitasGo](https://www.figma.com/proto/FWPPEeLuI3yQqZCnTdKkN4/EP1.3-PatigasGo?page-id=0%3A1&starting-point-node-id=1%3A7&scaling=min-zoom&content-scaling=fixed&show-proto-sidebar=1)
+- **Archivo de diseño:** [Ver archivo en Figma](https://www.figma.com/design/FWPPEeLuI3yQqZCnTdKkN4/EP1.3-PatigasGo)
 
+### Flujos del prototipo
 
-Las pantallas esenciales previstas son:
+El panel lateral del prototipo permite elegir uno de cuatro puntos de inicio:
+
+| Flujo | Recorrido |
+|---|---|
+| Usuario · móvil | Iniciar sesión → validación de errores → Explorar → Filtros → Detalle del animal → Formulario de postulación → Postulación enviada → Explorar |
+| Usuario · web | El mismo recorrido en escritorio, con menú lateral |
+| Refugio · web | Solicitudes ↔ Animales ↔ Agenda general, y Cerrar sesión |
+| Refugio · móvil | Solicitudes ↔ Animales, y Agenda desde la tarjeta Entrevistas |
+
+### Pantallas diseñadas en Figma
+
+Cada pantalla tiene versión móvil y web.
+
+| N.º | Pantalla | Requerimiento |
+|---|---|---|
+| 01 | Iniciar sesión y su variante con errores de validación | Acceso |
+| 02 | Crear cuenta y su variante con validación de contraseña | Acceso |
+| 03 | Explorar y filtrar, con filtros como ventana emergente | RF-01 |
+| 04 | Detalle del animal | RF-01 |
+| 05 | Formulario de postulación | RF-02 |
+| 06A | Postulación enviada | RF-02 |
+| 08 | Gestión de solicitudes | RF-03 |
+| 09 | Gestión de animales | RF-04 |
+| 14 | Agenda general | RF-08 |
+
+### Pantallas planificadas
+
+El listado completo de pantallas que contempla el sistema es el siguiente. Las que no aparecen en la tabla anterior se diseñarán en las próximas entregas:
 
 1. Inicio de sesión.
 2. Registro.
@@ -1207,10 +1346,10 @@ Las pantallas esenciales previstas son:
 29. Ficha del animal e historial médico.
 30. Consulta administrativa de apadrinamientos confirmados.
 
-Cada familia de pantalla deberá poseer adaptación móvil y web cuando corresponda al rol y contexto de uso. Los estados de carga, validación, ausencia de resultados, confirmación y transición pueden implementarse como variantes de una misma familia de pantalla cuando no requieran una ruta independiente. La navegación principal del Usuario continuará limitada a **Explorar, Postulaciones, Alertas y Perfil**; **Mis favoritos** y las opciones de cuenta permanecerán anidadas bajo Perfil, mientras que la coordinación y la entrevista confirmada permanecerán anidadas bajo Postulaciones. En escritorio, la ficha principal del animal podrá utilizar el espacio adicional mostrando una tarjeta compacta secundaria de otro animal disponible, facilitando la exploración continua sin alterar el significado de las acciones.
+Cada familia de pantalla tiene adaptación móvil y web cuando corresponde al rol y contexto de uso. Los estados de carga, validación, ausencia de resultados, confirmación y transición pueden implementarse como variantes de una misma familia de pantalla cuando no requieran una ruta independiente. La navegación principal del Usuario se limita a **Explorar, Postulaciones, Alertas y Perfil**; **Mis favoritos** y las opciones de cuenta quedan anidadas bajo Perfil, mientras que la coordinación y la entrevista confirmada quedan anidadas bajo Postulaciones. En escritorio, la ficha principal del animal utiliza el espacio adicional mostrando una tarjeta compacta secundaria de otro animal disponible, facilitando la exploración continua sin alterar el significado de las acciones.
 
 ---
-##  Credenciales de Prueba para Evaluación
+## Credenciales de Prueba para Evaluación
 
 Para facilitar la revisión de los flujos tanto de Usuario como de Administrador sin necesidad de registrar una nueva cuenta desde cero, se han habilitado las siguientes credenciales de acceso preconfiguradas:
 
@@ -1226,28 +1365,23 @@ Para facilitar la revisión de los flujos tanto de Usuario como de Administrador
 
 ## Librerías usadas con React (Ionic)
 
-Las siguientes dependencias están planificadas para la aplicación base de EP 1.5 y EP 1.6. La lista deberá actualizarse según el contenido real de `package.json` cuando se inicialice el proyecto.
+Dependencias principales según `package.json`:
 
-- Componentes y estilos oficiales de Ionic.
-- Variables CSS del tema para aplicar la identidad visual de PatitasGo.
-
-### Librerías principales
-
-| Librería | Propósito |
-|---|---|
-| `react` | Construcción de la interfaz mediante componentes. |
-| `react-dom` | Renderizado de componentes React en la versión web. |
-| `@ionic/react` | Componentes de interfaz como `IonPage`, `IonContent`, `IonButton`, `IonInput`, `IonCard`, `IonTabs`, `IonMenu` e `IonModal`. |
-| `@ionic/react-router` | Integración de Ionic con el sistema de rutas de React. |
-| `react-router-dom` | Definición de rutas públicas, protegidas y parametrizadas. |
-| `ionicons` | Iconos consistentes para navegación, acciones, estados e información. |
+| Librería | Versión | Propósito |
+|---|---|---|
+| `react` / `react-dom` | 19.0 | Construcción y renderizado de la interfaz mediante componentes. |
+| `@ionic/react` | 9.x | Componentes de interfaz como `IonPage`, `IonHeader`, `IonContent`, `IonFooter`, `IonButton`, `IonInput`, `IonList`, `IonCard`, `IonModal`, `IonAlert` e `IonToast`. |
+| `@ionic/react-router` | 9.x | Integración de Ionic con el sistema de rutas (`IonReactRouter`, `IonRouterOutlet`). |
+| `react-router-dom` | 6.30 | Definición de rutas públicas, protegidas y parametrizadas. |
+| `ionicons` | 8.x | Iconos de navegación, acciones y estados. |
+| `@capacitor/core` | 8.x | Base para generar la versión móvil nativa. |
+| `vite` / `typescript` | 8.x / 5.9 | Servidor de desarrollo, compilación y tipado estático. |
 
 ## Tecnologías
 
 - **Ionic Framework**
 - **React**
 - **TypeScript**
-- **Capacitor**, para capacidades nativas cuando sean necesarias
-- **Node.js**
-- **Express.js**
-- **PostgreSQL**
+- **Capacitor**, para generar la versión móvil nativa
+- **Vite**, como servidor de desarrollo y empaquetador
+- **Node.js**, **Express.js** y **PostgreSQL**, para el backend de la Entrega Parcial 2
