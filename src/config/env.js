@@ -8,7 +8,8 @@ if (faltantes.length > 0) {
 
 module.exports = {
   port: Number(process.env.PORT) || 3000,
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:8100',
+  // Puede ser una lista separada por comas (ionic serve usa 8100 y vite 5173)
+  corsOrigin: (process.env.CORS_ORIGIN || 'http://localhost:8100,http://localhost:5173').split(',').map((o) => o.trim()),
   db: {
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT),
