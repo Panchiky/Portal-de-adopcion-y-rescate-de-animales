@@ -1,7 +1,6 @@
 # PatitasGo · Backend (API REST)
 
-API del portal **PatitasGo**, para adopción y rescate de animales. Los refugios publican fichas y gestionan solicitudes, y las personas exploran animales, postulan y siguen su proceso. Corresponde a la **Entrega Parcial 2** de Ingeniería Web y Móvil (Ingeniería en Informática, PUCV).
-
+API del portal **PatitasGo**, para adopción y rescate de animales. Los refugios publican fichas y gestionan solicitudes, y las personas exploran animales, postulan y siguen su proceso.
 El frontend (Ionic + React) está en la rama [`frontend`](../../tree/frontend) y consume esta API con Axios.
 
 ## Tecnologías
