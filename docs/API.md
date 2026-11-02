@@ -203,6 +203,10 @@ PATCH /api/postulaciones/1/estado
 
 Los logins guardan los tokens en variables de la colección (`tokenAdmin`, `tokenAdmin2`, `tokenUsuario`), y los `POST` guardan los ids creados para las peticiones siguientes. La colección tiene 53 peticiones y 127 tests, que cubren casos correctos y errores esperados (401, 403, 404, 409 y validaciones). Se puede ejecutar varias veces seguidas sin recargar la base. Cada ejecución hace 3 intentos fallidos de autenticación a propósito, así que tras la tercera seguida hay que esperar 15 minutos o reiniciar la API para no recibir `429`.
 
+Resultado de la ejecución en Postman (53 peticiones, 127 tests aprobados, 0 fallidos):
+
+![Runner de Postman](evidencias/postman-runner.jpg)
+
 Usuarios de prueba del seed:
 
 | Correo | Contraseña | Rol |
