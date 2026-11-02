@@ -9,6 +9,7 @@
 1. [Descripción general y objetivos](#descripción-general-del-sistema)
     - [Distribución de responsabilidades](#distribución-de-responsabilidades)
     - [Instalación y ejecución](#instalación-y-ejecución)
+    - [Integración con el backend](#integración-con-el-backend-avance-2)
 2. [Justificación del problema](#justificación-del-problema)
 3. [Usuarios](#usuarios-objetivo-quién-usará-la-aplicación)
     - [Roles](#roles-del-sistema)
@@ -25,7 +26,7 @@
 
 ## Descripción general del sistema
 
-**PatitasGo** es un portal web y una aplicación móvil para la adopción y el rescate de animales. Reúne en un solo lugar las fichas de los animales rescatados, la búsqueda con filtros, el envío y seguimiento de postulaciones y la gestión de solicitudes por parte de los refugios. El frontend está construido con **Ionic + React + TypeScript** y se adapta a celulares y computadores.
+**PatitasGo** es un portal web y una aplicación móvil para la adopción y el rescate de animales. Reúne en un solo lugar las fichas de los animales rescatados, la búsqueda con filtros, el envío y seguimiento de postulaciones y la gestión de solicitudes por parte de los refugios. El frontend está construido con **Ionic + React + TypeScript** y se adapta a celulares y computadores. Desde el Avance 2 consume una API REST propia (**Node.js + Express + PostgreSQL**, rama [`backend`](../../tree/backend)) mediante **Axios**, con autenticación JWT y control de acceso por rol.
 
 ### Objetivos del proyecto
 
@@ -57,6 +58,8 @@ El detalle de cada funcionalidad está en [Requerimientos](#requerimientos).
 | Elías Bravo | Integración de archivos del frontend y configuración de rutas en `App.tsx`. |
 | Tomás Guerra | Diseño UI/UX en Figma: pantallas móvil y web, coherencia visual, prototipo navegable con sus flujos y corrección del Figma según la retroalimentación de la EP1. |
 
+En el **Avance 2** la integración del frontend con la API (cliente Axios, interceptores, servicios y conexión de las pantallas de Usuario y Administrador) estuvo a cargo de Kevin Rubilar. La distribución del backend está en el [README de la rama `backend`](../../tree/backend#integrantes-y-créditos).
+
 ---
 
 ## Instalación y ejecución
@@ -65,6 +68,7 @@ El detalle de cada funcionalidad está en [Requerimientos](#requerimientos).
 
 - [Node.js](https://nodejs.org/) 20 o superior (incluye `npm`).
 - [Git](https://git-scm.com/).
+- La API de la rama [`backend`](../../tree/backend) en ejecución con su base de datos PostgreSQL. Los pasos están en su [README](../../tree/backend#instalación-y-ejecución).
 - Opcional: [Ionic CLI](https://ionicframework.com/docs/cli) (`npm install -g @ionic/cli`) para usar `ionic serve`.
 
 ### Instalación
@@ -76,13 +80,28 @@ git checkout frontend
 npm install
 ```
 
+Luego copia `.env.example` como `.env`. Ese archivo define la URL de la API:
+
+```bash
+cp .env.example .env        # en Windows PowerShell: Copy-Item .env.example .env
+```
+
+| Variable | Valor por defecto | Descripción |
+|---|---|---|
+| `VITE_API_URL` | `http://localhost:3000/api` | URL base de la API que consume Axios |
+
+El archivo `.env` está en `.gitignore`; solo se versiona `.env.example`.
+
 ### Ejecución
+
+1. Levanta primero la API (en la carpeta de la rama `backend`): `npm run dev`. Debe responder en `http://localhost:3000/api/health`.
+2. En esta rama:
 
 ```bash
 npm run dev
 ```
 
-La aplicación queda disponible en `http://localhost:5173`. Para ver la versión móvil, abre las herramientas de desarrollador del navegador (F12) y activa la vista de dispositivo.
+La aplicación queda disponible en `http://localhost:5173`. El backend acepta por CORS los orígenes `http://localhost:5173` (Vite) y `http://localhost:8100` (`ionic serve`). Para ver la versión móvil, abre las herramientas de desarrollador del navegador (F12) y activa la vista de dispositivo.
 
 Otros comandos disponibles:
 
@@ -102,13 +121,51 @@ Otros comandos disponibles:
 
 ```text
 src/
-├── components/   Componentes reutilizables (menús, barras de navegación, tarjeta de animal)
+├── components/   Componentes reutilizables (menús, barras de navegación, tarjeta de animal, estado de carga)
+├── hooks/        useCarga: carga datos de la API al mostrar cada vista
 ├── pages/        Vistas agrupadas por rol: auth, home, user y admin
 ├── routes/       ProtectedRoute: control de sesión y rol
-├── services/     Acceso a datos (en esta etapa, datos de ejemplo)
+├── services/     Cliente Axios, sesión y servicios que consumen la API
 ├── theme/        Variables de estilo
 └── App.tsx       Definición de rutas públicas y protegidas
 ```
+
+---
+
+## Integración con el backend (Avance 2)
+
+### Cliente Axios e interceptores
+
+`src/services/api.ts` crea una instancia de Axios con la URL base de `VITE_API_URL`, un tiempo máximo de 10 segundos y JSON por defecto. Tiene dos interceptores:
+
+- **De petición:** agrega `Authorization: Bearer <token>` a cada llamada cuando hay una sesión abierta.
+- **De respuesta:** si la API responde `401` con una sesión abierta (token vencido o inválido), borra la sesión y redirige a `/login`.
+
+`mensajeError()` convierte cualquier error de Axios en un mensaje legible: sin conexión con el servidor, errores de validación campo por campo (`detalles`) o el mensaje que entrega la API.
+
+### Sesión
+
+`src/services/sesion.ts` guarda el token JWT y los datos del usuario en `localStorage`, y revisa la fecha de expiración del token (`exp`) antes de considerarlo válido. `authService.ts` usa esos datos para `estaAutenticado()`, `obtenerRol()` y la redirección por rol después del login, y `ProtectedRoute` los usa para proteger las rutas. La autorización definitiva la hace siempre el backend.
+
+### Servicios y endpoints
+
+| Servicio | Endpoints que consume | Vistas que lo usan |
+|---|---|---|
+| `authService.ts` | `POST /auth/login`, `POST /auth/registro` | Inicio de sesión, Registro, Perfil |
+| `animalesService.ts` | `GET /animales`, `GET /animales/:id`, `GET /animales/gestion`, `POST /animales`, `PUT /animales/:id`, `PATCH /animales/:id/estado`, `DELETE /animales/:id`, `GET/POST/DELETE /favoritos` | Explorar, Detalle, Favoritos, Refugios, Apadrinar, Gestión de animales, Nueva y Editar ficha, Resumen |
+| `postulacionesService.ts` | `POST /postulaciones`, `GET /postulaciones/mias`, `GET /postulaciones`, `GET /postulaciones/:id`, `PATCH /postulaciones/:id/estado`, `DELETE /postulaciones/:id` | Postular, Mis postulaciones, Detalle de postulación, Solicitudes, Detalle de solicitud, Resumen |
+| `alertasService.ts` | `GET /notificaciones`, `PATCH /notificaciones/:id/leida` | Alertas |
+
+Cada servicio transforma la respuesta de la API al formato que usan las pantallas. Por ejemplo, `edadMeses` se convierte en "2 años" y `tamano` en "Mediano".
+
+### Estados de carga y error
+
+El hook `useCarga` (`src/hooks/useCarga.ts`) pide los datos cada vez que se muestra una vista (`useIonViewWillEnter`), así las listas quedan al día al volver atrás. El componente `EstadoCarga` muestra un `IonSpinner` mientras carga, o el error con un botón **Reintentar**. Los formularios desactivan su botón mientras envían, validan en el cliente con las mismas reglas del backend y muestran los errores que devuelve la API (por ejemplo, RUT inválido o postulación repetida).
+
+### Alcance de la integración
+
+- **Conectado a la API:** autenticación, catálogo, ficha, favoritos, postulación y su seguimiento (con retiro), alertas, y en el panel del refugio el resumen, las solicitudes (cambios de estado, rechazo con motivo y exportación CSV) y la gestión de animales (crear, editar, publicar u ocultar, archivar y eliminar).
+- **Pendiente:** la Agenda de entrevistas y la recuperación de contraseña siguen con datos de ejemplo, porque el backend aún no tiene endpoints de citas ni de correo; el pago del apadrinamiento es simulado.
 
 ---
 
@@ -560,37 +617,37 @@ Los siguientes son los **cinco RNF principales y evaluables** de EP 1.1. Los cri
 
 ### 1. Rutas principales y secundarias
 
-La aplicación considera rutas públicas y rutas protegidas. Las rutas protegidas comprueban la sesión y el rol en el frontend mediante `ProtectedRoute` (`src/routes/ProtectedRoute.tsx`); al integrar la API, el backend repetirá esta comprobación. Si una persona sin sesión intenta entrar a una ruta protegida, se redirige a `/login` y, tras iniciar sesión, vuelve a la vista que intentaba abrir.
+La aplicación considera rutas públicas y rutas protegidas. Las rutas protegidas comprueban la sesión y el rol en el frontend mediante `ProtectedRoute` (`src/routes/ProtectedRoute.tsx`), y el backend repite esta comprobación en cada endpoint con el token JWT. Si una persona sin sesión intenta entrar a una ruta protegida, se redirige a `/login` y, tras iniciar sesión, vuelve a la vista que intentaba abrir.
 
-La columna **Estado** indica si la ruta ya está implementada en el frontend o si se incorporará en la Entrega Parcial 2, junto con el backend.
+La columna **Estado** indica si la vista ya obtiene sus datos de la API (**Conectada a la API**), si está implementada sin backend o si está planificada para una próxima entrega.
 
 #### Rutas públicas
 
 | Ruta | Vista | Descripción | Estado |
 |---|---|---|---|
 | `/` | Inicio | Presenta la propuesta de PatitasGo y accesos a Adopta, Refugios, inicio de sesión y registro. | Implementada |
-| `/login` | Inicio de sesión | Permite ingresar mediante credenciales y redirige a la experiencia correspondiente al rol. | Implementada |
-| `/registro` | Registro | Permite crear una cuenta con rol Usuario. | Implementada |
-| `/recuperar` | Recuperar contraseña | Permite solicitar un enlace temporal para restablecer la contraseña. | Implementada |
-| `/refugios` | Refugios y organizaciones | Presenta los refugios que publican animales, su comuna y cuántos animales tienen disponibles. | Implementada |
-| `/catalogo` | Explorar animales | Presenta animales disponibles, nombre y ubicación general del refugio, selector de ubicación y filtros por radio. | Implementada |
-| `/animales/:id` | Detalle del animal | Presenta la ficha pública, información sanitaria autorizada, refugio responsable, comuna, región, distancia aproximada y acciones disponibles. | Implementada |
+| `/login` | Inicio de sesión | Permite ingresar mediante credenciales y redirige a la experiencia correspondiente al rol. | Conectada a la API |
+| `/registro` | Registro | Permite crear una cuenta con rol Usuario. | Conectada a la API |
+| `/recuperar` | Recuperar contraseña | Permite solicitar un enlace temporal para restablecer la contraseña. | Implementada (sin backend) |
+| `/refugios` | Refugios y organizaciones | Presenta los refugios que publican animales, su comuna y cuántos animales tienen disponibles. | Conectada a la API |
+| `/catalogo` | Explorar animales | Presenta animales disponibles, nombre y ubicación general del refugio, selector de ubicación y filtros por radio. | Conectada a la API |
+| `/animales/:id` | Detalle del animal | Presenta la ficha pública, información sanitaria autorizada, refugio responsable, comuna, región, distancia aproximada y acciones disponibles. | Conectada a la API |
 
 #### Rutas protegidas del Usuario
 
 | Ruta | Vista | Descripción | Estado |
 |---|---|---|---|
-| `/animales/:id/postular` | Formulario de postulación | Permite completar Datos, Motivación y Confirmación. | Implementada |
-| `/animales/:id/postulacion-enviada` | Postulación enviada | Confirma el envío de la postulación y su estado inicial `PENDIENTE`. | Implementada |
-| `/usuario/postulaciones` | Mis postulaciones | Presenta las solicitudes propias y su estado actual. | Implementada |
-| `/usuario/postulaciones/:id` | Detalle de postulación | Presenta el seguimiento de una solicitud propia. | Implementada |
+| `/animales/:id/postular` | Formulario de postulación | Permite completar Datos, Motivación y Confirmación. | Conectada a la API |
+| `/animales/:id/postulacion-enviada` | Postulación enviada | Confirma el envío de la postulación y su estado inicial `PENDIENTE`. | Conectada a la API |
+| `/usuario/postulaciones` | Mis postulaciones | Presenta las solicitudes propias y su estado actual. | Conectada a la API |
+| `/usuario/postulaciones/:id` | Detalle de postulación | Presenta el seguimiento de una solicitud propia. | Conectada a la API |
 | `/usuario/postulaciones/:id/coordinar` | Coordinación de entrevista | Permite al Usuario con postulación aceptada en proceso consultar si la cita está por confirmar, confirmada o requiere otro horario, y responder a la propuesta. | Planificada (EP2) |
 | `/usuario/postulaciones/:id/entrevista` | Entrevista confirmada | Presenta el resumen de una cita confirmada con animal, refugio, fecha, hora, modalidad, lugar e instrucciones autorizadas. | Planificada (EP2) |
-| `/animales/:id/apadrinar` | Apadrinar | Permite seleccionar frecuencia y monto antes de continuar al proveedor de pago. | Implementada |
+| `/animales/:id/apadrinar` | Apadrinar | Permite seleccionar frecuencia y monto antes de continuar al proveedor de pago. | Conectada a la API (pago simulado) |
 | `/usuario/apadrinamientos` | Mis apadrinamientos | Presenta aportes confirmados y renovaciones mensuales propias. | Planificada (EP2) |
-| `/usuario/alertas` | Alertas | Presenta las notificaciones de la cuenta; las notificaciones accionables permiten acceder directamente a la postulación, coordinación o entrevista relacionada. | Implementada |
-| `/usuario/perfil` | Perfil | Presenta los datos básicos y accesos a favoritos, edición de información, contraseña, apariencia, privacidad y cierre de sesión. | Implementada |
-| `/usuario/favoritos` | Mis favoritos | Presenta los animales guardados por el Usuario sin crear una postulación. | Implementada |
+| `/usuario/alertas` | Alertas | Presenta las notificaciones de la cuenta; las notificaciones accionables permiten acceder directamente a la postulación, coordinación o entrevista relacionada. | Conectada a la API |
+| `/usuario/perfil` | Perfil | Presenta los datos básicos y accesos a favoritos, edición de información, contraseña, apariencia, privacidad y cierre de sesión. | Conectada a la API (datos de la sesión) |
+| `/usuario/favoritos` | Mis favoritos | Presenta los animales guardados por el Usuario sin crear una postulación. | Conectada a la API |
 | `/usuario/perfil/editar` | Editar información | Permite actualizar datos personales editables de la cuenta. | Planificada (EP2) |
 | `/usuario/perfil/contrasena` | Cambiar contraseña | Permite modificar la contraseña desde una sesión autenticada mediante validaciones de seguridad. | Planificada (EP2) |
 | `/usuario/perfil/apariencia` | Apariencia | Permite seleccionar y conservar preferencias visuales disponibles de la interfaz. | Planificada (EP2) |
@@ -600,17 +657,17 @@ La columna **Estado** indica si la ruta ya está implementada en el frontend o s
 
 | Ruta | Vista | Descripción | Estado |
 |---|---|---|---|
-| `/admin/resumen` | Resumen | Presenta indicadores operativos y accesos a tareas frecuentes. | Implementada |
-| `/admin/solicitudes` | Gestión de solicitudes | Permite listar y filtrar las postulaciones recibidas. | Implementada |
-| `/admin/solicitudes/:id` | Detalle de solicitud | Permite revisar respuestas y efectuar una transición válida. | Implementada |
+| `/admin/resumen` | Resumen | Presenta indicadores operativos y accesos a tareas frecuentes. | Conectada a la API |
+| `/admin/solicitudes` | Gestión de solicitudes | Permite listar y filtrar las postulaciones recibidas. | Conectada a la API |
+| `/admin/solicitudes/:id` | Detalle de solicitud | Permite revisar respuestas y efectuar una transición válida. | Conectada a la API |
 | `/admin/solicitudes/:id/coordinar` | Coordinación, entrevista y cierre | Permite confirmar o proponer horario, registrar asistencia y resultado, verificar la identidad y cerrar la adopción o liberar al animal. | Planificada (EP2) |
-| `/admin/agenda` | Agenda | Presenta las entrevistas del refugio por día, con días anteriores y próximos. | Implementada |
-| `/admin/animales` | Gestión de animales | Permite consultar y mantener las fichas del refugio. | Implementada |
-| `/admin/animales/nuevo` | Nueva ficha | Permite registrar un animal en estado borrador. | Implementada |
-| `/admin/animales/:id/editar` | Editar ficha | Permite modificar, publicar o archivar una ficha existente. | Planificada (EP2) |
+| `/admin/agenda` | Agenda | Presenta las entrevistas del refugio por día, con días anteriores y próximos. | Implementada (datos de ejemplo) |
+| `/admin/animales` | Gestión de animales | Permite consultar y mantener las fichas del refugio. | Conectada a la API |
+| `/admin/animales/nuevo` | Nueva ficha | Permite registrar un animal como borrador o publicarlo de inmediato. | Conectada a la API |
+| `/admin/animales/:id/editar` | Editar ficha | Permite modificar una ficha existente; publicar, ocultar, archivar y eliminar se hacen desde Gestión de animales. | Conectada a la API |
 | `/admin/animales/:id/salud` | Historial médico | Permite consultar y registrar eventos médicos. | Planificada (EP2) |
 | `/admin/apadrinamientos` | Aportes confirmados | Permite consultar los aportes asociados a animales del refugio. | Planificada (EP2) |
-| `/admin/perfil` | Perfil administrativo | Presenta los datos de cuenta y la opción de cerrar sesión. | Implementada |
+| `/admin/perfil` | Perfil administrativo | Presenta los datos de cuenta y la opción de cerrar sesión. | Conectada a la API (datos de la sesión) |
 
 ### 2. Relaciones jerárquicas entre vistas
 
@@ -1351,17 +1408,15 @@ Cada familia de pantalla tiene adaptación móvil y web cuando corresponde al ro
 ---
 ## Credenciales de Prueba para Evaluación
 
-Para facilitar la revisión de los flujos tanto de Usuario como de Administrador sin necesidad de registrar una nueva cuenta desde cero, se han habilitado las siguientes credenciales de acceso preconfiguradas:
+Desde el Avance 2 el inicio de sesión se valida contra la API, así que solo funcionan las cuentas cargadas por `seed.sql` de la rama `backend` (o una cuenta nueva creada en **Registro**):
 
-### 1. Perfil de Usuario (Exploración, Postulaciones y Apadrinamientos)
-* **Correo electrónico:** `tomas@ejemplo.cl` (o cualquier correo con formato válido `@gmail.com`, `@outlook.com`, etc.)
-* **Contraseña:** Cualquier contraseña
-* *Nota:* Al iniciar sesión con un correo estándar, el sistema dirigirá automáticamente la interfaz hacia la experiencia del rol **Usuario**.
+| Perfil | Correo | Contraseña | Qué permite revisar |
+|---|---|---|---|
+| Usuario | `tomas@ejemplo.cl` | `Usuario123!` | Exploración, favoritos, postulaciones, alertas y apadrinamiento |
+| Administrador · Huellas Felices | `admin@patitasgo.cl` | `Admin123!` | Resumen, solicitudes y gestión de animales de su refugio |
+| Administrador · Patitas del Puerto | `admin.puerto@patitasgo.cl` | `Admin123!` | Lo mismo, para un segundo refugio (cada admin ve solo los datos del suyo) |
 
-### 2. Perfil de Administrador (Gestión de Refugio, Solicitudes y Fichas)
-* **Correo electrónico:** `admin@patitasgo.cl`
-* **Contraseña:** Cualquier contraseña válida configurada en el sistema.
-* *Nota:* Al ingresar con este correo administrativo, el sistema validará el rol y desplegará el panel de control exclusivo para la gestión de solicitudes y animales del refugio.
+Al iniciar sesión, la aplicación redirige según el rol que entrega la API: el Usuario llega a **Explorar** y el Administrador al **Resumen** del refugio.
 
 ## Librerías usadas con React (Ionic)
 
@@ -1376,6 +1431,7 @@ Dependencias principales según `package.json`:
 | `ionicons` | 8.x | Iconos de navegación, acciones y estados. |
 | `@capacitor/core` | 8.x | Base para generar la versión móvil nativa. |
 | `vite` / `typescript` | 8.x / 5.9 | Servidor de desarrollo, compilación y tipado estático. |
+| `axios` | 1.x | Cliente HTTP para consumir la API REST, con interceptores para el token y los errores de sesión. |
 
 ## Tecnologías
 
@@ -1384,4 +1440,5 @@ Dependencias principales según `package.json`:
 - **TypeScript**
 - **Capacitor**, para generar la versión móvil nativa
 - **Vite**, como servidor de desarrollo y empaquetador
-- **Node.js**, **Express.js** y **PostgreSQL**, para el backend de la Entrega Parcial 2
+- **Axios**, para consumir la API REST
+- **Node.js**, **Express.js** y **PostgreSQL**, en el backend (rama [`backend`](../../tree/backend))
