@@ -24,16 +24,20 @@ INSERT INTO usuarios (nombre, apellido, email, password_hash, rol_id, refugio_id
 INSERT INTO animales (refugio_id, nombre, especie, raza, sexo, edad_meses, tamano, estado, descripcion, salud, vacunado, esterilizado, foto_url) VALUES
   (1, 'Milo', 'GATO', 'Mestizo', 'MACHO', 24, 'MEDIANO', 'DISPONIBLE',
    'Compañero sociable que disfruta las siestas al sol y busca un hogar estable y amoroso.',
-   'Vacunas al día, desparasitado y esterilizado.', TRUE, TRUE, NULL),
+   'Vacunas al día, desparasitado y esterilizado.', TRUE, TRUE,
+   'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80'),
   (1, 'Luna', 'PERRO', 'Mestiza', 'HEMBRA', 36, 'GRANDE', 'DISPONIBLE',
    'Tranquila y cariñosa, ideal para una familia con patio.',
-   'Vacunas al día y esterilizada.', TRUE, TRUE, NULL),
+   'Vacunas al día y esterilizada.', TRUE, TRUE,
+   'https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=800&q=80'),
   (2, 'Rocky', 'PERRO', 'Mestizo', 'MACHO', 12, 'PEQUENO', 'DISPONIBLE',
    'Juguetón y lleno de energía, necesita paseos diarios.',
-   'Vacunas al día, pendiente de esterilización.', TRUE, FALSE, NULL),
+   'Vacunas al día, pendiente de esterilización.', TRUE, FALSE,
+   'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80'),
   (2, 'Mabel', 'GATO', 'Mestiza', 'HEMBRA', 60, 'PEQUENO', 'BORRADOR',
    'Gata adulta, independiente y muy tranquila.',
-   'En evaluación veterinaria.', FALSE, TRUE, NULL);
+   'En evaluación veterinaria.', FALSE, TRUE,
+   'https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=800&q=80');
 
 INSERT INTO postulaciones (usuario_id, animal_id, estado, rut, telefono, comuna, tipo_vivienda, otras_mascotas, motivacion, acepta_terminos) VALUES
   (2, 1, 'PENDIENTE', '12.345.678-5', '+56 9 5555 6666', 'Viña del Mar', 'Departamento', 'Ninguna',
