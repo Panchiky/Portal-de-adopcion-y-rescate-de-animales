@@ -1,34 +1,86 @@
 import React, { useState } from 'react';
-import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton, IonIcon, IonToast } from '@ionic/react';
+import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton, IonIcon, IonToast, IonActionSheet, IonAlert, useIonRouter } from '@ionic/react';
 import { ellipsisHorizontal, searchOutline, addOutline } from 'ionicons/icons';
 import { MenuLateralAdmin, BarraInferiorAdmin } from '../../components/MenuAdmin';
+import EstadoCarga from '../../components/EstadoCarga';
+import { obtenerAnimalesRefugio, cambiarEstadoAnimal, eliminarAnimal, textoEdad, Animal, EstadoAnimal } from '../../services/animalesService';
+import { mensajeError } from '../../services/api';
+import { useCarga } from '../../hooks/useCarga';
 import './AnimalesAdmin.css';
 
-const AnimalesAdmin: React.FC = () => {
+const ETIQUETA_ESTADO: Record<EstadoAnimal, { texto: string; clase: string }> = {
+  DISPONIBLE: { texto: 'PUBLICADO', clase: 'estado-publicado' },
+  BORRADOR: { texto: 'BORRADOR', clase: 'estado-borrador' },
+  RESERVADO: { texto: 'RESERVADO', clase: 'estado-reservado' },
+  ADOPTADO: { texto: 'ADOPTADO', clase: 'estado-adoptado' },
+  ARCHIVADO: { texto: 'ARCHIVADO', clase: 'estado-archivado' }
+};
 
-  const [animales] = useState([
-    { id: 'ANI-026', nombre: 'Milo', img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=100&q=80', especie: 'Gato', edad: '2 años', salud: 'AL DÍA', saludClase: 'salud-aldia', estado: 'PUBLICADO', estadoClase: 'estado-publicado' },
-    { id: 'ANI-025', nombre: 'Luna', img: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=100&q=80', especie: 'Gato', edad: '8 años', salud: 'AL DÍA', saludClase: 'salud-aldia', estado: 'PUBLICADO', estadoClase: 'estado-publicado' },
-    { id: 'ANI-024', nombre: 'Mabel', img: 'https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=100&q=80', especie: 'Gato', edad: '1 año', salud: 'PENDIENTE', saludClase: 'salud-pendiente', estado: 'BORRADOR', estadoClase: 'estado-borrador' },
-    { id: 'ANI-023', nombre: 'Kira', img: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=100&q=80', especie: 'Perra', edad: '4 años', salud: 'CONTROL', saludClase: 'salud-control', estado: 'PUBLICADO', estadoClase: 'estado-publicado' }
-  ]);
+// Vacunas y esterilización al día = AL DÍA, solo una = CONTROL, ninguna = PENDIENTE
+const saludAnimal = (a: Animal) => {
+  if (a.api.vacunado && a.api.esterilizado) return { texto: 'AL DÍA', clase: 'salud-aldia' };
+  if (a.api.vacunado || a.api.esterilizado) return { texto: 'CONTROL', clase: 'salud-control' };
+  return { texto: 'PENDIENTE', clase: 'salud-pendiente' };
+};
+
+const codigoAnimal = (id: number) => `ANI-${String(id).padStart(3, '0')}`;
+const cargarAnimales = () => obtenerAnimalesRefugio();
+
+const AnimalesAdmin: React.FC = () => {
+  const router = useIonRouter();
+  const { datos, setDatos, cargando, error, recargar } = useCarga(cargarAnimales);
+  const animales = datos ?? [];
   const [busqueda, setBusqueda] = useState('');
-  const [estado, setEstado] = useState('TODOS');
+  const [estado, setEstado] = useState<'TODOS' | EstadoAnimal>('TODOS');
   const [especie, setEspecie] = useState('TODAS');
   const [mensaje, setMensaje] = useState('');
+  const [opcionesDe, setOpcionesDe] = useState<Animal | null>(null);
+  const [eliminarA, setEliminarA] = useState<Animal | null>(null);
 
-  const ESTADOS = ['TODOS', 'PUBLICADO', 'BORRADOR'];
+  const ESTADOS: ('TODOS' | EstadoAnimal)[] = ['TODOS', 'DISPONIBLE', 'BORRADOR', 'RESERVADO', 'ADOPTADO', 'ARCHIVADO'];
   const ESPECIES = ['TODAS', 'GATO', 'PERRO'];
-  const siguiente = (lista: string[], actual: string) => lista[(lista.indexOf(actual) + 1) % lista.length];
+  const siguiente = <T,>(lista: T[], actual: T) => lista[(lista.indexOf(actual) + 1) % lista.length];
   const texto = busqueda.trim().toLowerCase();
   const animalesVisibles = animales.filter((a) =>
-    (texto === '' || `${a.nombre} ${a.especie} ${a.id}`.toLowerCase().includes(texto)) &&
-    (estado === 'TODOS' || a.estado === estado) &&
-    (especie === 'TODAS' || a.especie.toUpperCase().startsWith(especie.slice(0, 4)))
+    (texto === '' || `${a.name} ${a.species} ${codigoAnimal(a.id)}`.toLowerCase().includes(texto)) &&
+    (estado === 'TODOS' || a.status === estado) &&
+    (especie === 'TODAS' || a.api.especie === especie)
   );
-  const proximamente = (accion: string, nombre: string) =>
-    setMensaje(`${accion} de ${nombre}: disponible al integrar el backend (EP2).`);
+  const contar = (e: EstadoAnimal) => animales.filter((a) => a.status === e).length;
+  const controlPendiente = animales.filter((a) => saludAnimal(a).texto !== 'AL DÍA').length;
 
+  const reemplazar = (actualizado: Animal) =>
+    setDatos((lista) => (lista ?? []).map((a) => (a.id === actualizado.id ? actualizado : a)));
+
+  const cambiarEstado = async (animal: Animal, nuevo: EstadoAnimal) => {
+    try {
+      reemplazar(await cambiarEstadoAnimal(animal.id, nuevo));
+      setMensaje(`${animal.name} ahora está ${ETIQUETA_ESTADO[nuevo].texto.toLowerCase()}`);
+    } catch (err) {
+      setMensaje(mensajeError(err));
+    }
+  };
+
+  const eliminar = async (animal: Animal) => {
+    try {
+      await eliminarAnimal(animal.id);
+      setDatos((lista) => (lista ?? []).filter((a) => a.id !== animal.id));
+      setMensaje(`Ficha de ${animal.name} eliminada`);
+    } catch (err) {
+      setMensaje(mensajeError(err));
+    }
+  };
+
+  // Publicar deja la ficha visible en el catálogo; ocultar la devuelve a borrador
+  const botonPublicar = (animal: Animal, clase: string) => {
+    if (animal.status === 'BORRADOR' || animal.status === 'ARCHIVADO') {
+      return <button className={clase} onClick={() => cambiarEstado(animal, 'DISPONIBLE')}>Publicar</button>;
+    }
+    if (animal.status === 'DISPONIBLE') {
+      return <button className={clase} onClick={() => cambiarEstado(animal, 'BORRADOR')}>Ocultar</button>;
+    }
+    return null;
+  };
 
   return (
     <IonPage>
@@ -59,19 +111,19 @@ const AnimalesAdmin: React.FC = () => {
               {/* Tarjetas de Estadísticas */}
               <div className="stats-cards-container">
                 <div className="admin-stat-card">
-                  <h3>26</h3>
+                  <h3>{animales.length}</h3>
                   <p>Registrados</p>
                 </div>
                 <div className="admin-stat-card bg-green-light">
-                  <h3>21</h3>
+                  <h3>{contar('DISPONIBLE')}</h3>
                   <p>Publicados</p>
                 </div>
                 <div className="admin-stat-card">
-                  <h3>5</h3>
+                  <h3>{contar('BORRADOR')}</h3>
                   <p>Borradores</p>
                 </div>
                 <div className="admin-stat-card bg-yellow-light">
-                  <h3>4</h3>
+                  <h3>{controlPendiente}</h3>
                   <p>Con control pendiente</p>
                 </div>
               </div>
@@ -83,11 +135,16 @@ const AnimalesAdmin: React.FC = () => {
                   <input type="text" placeholder="Buscar por nombre, especie o ID" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
                 </div>
                 <div className="filter-buttons">
-                  <button className="filter-btn" onClick={() => setEstado(siguiente(ESTADOS, estado))}>Estado: {estado === 'TODOS' ? 'Todos' : estado}</button>
+                  <button className="filter-btn" onClick={() => setEstado(siguiente(ESTADOS, estado))}>Estado: {estado === 'TODOS' ? 'Todos' : ETIQUETA_ESTADO[estado].texto}</button>
                   <button className="filter-btn" onClick={() => setEspecie(siguiente(ESPECIES, especie))}>Especie: {especie === 'TODAS' ? 'Todas' : especie}</button>
                   <button className="filter-btn text-success" onClick={() => { setBusqueda(''); setEstado('TODOS'); setEspecie('TODAS'); }}>Limpiar filtros</button>
                 </div>
               </div>
+
+              <EstadoCarga cargando={cargando} error={error} onReintentar={recargar} />
+              {datos && animalesVisibles.length === 0 && (
+                <p className="text-muted">{animales.length === 0 ? 'Aún no hay fichas. Crea la primera con "Nueva ficha".' : 'Ningún animal coincide con los filtros.'}</p>
+              )}
 
               {/* --- VISTA DESKTOP: TABLA --- */}
               <div className="desktop-table-container">
@@ -106,25 +163,25 @@ const AnimalesAdmin: React.FC = () => {
                       <tr key={animal.id}>
                         <td>
                           <div className="animal-cell">
-                            <img src={animal.img} alt={animal.nombre} className="animal-avatar" />
+                            <img src={animal.image} alt={animal.name} className="animal-avatar" />
                             <div>
-                              <div className="animal-nombre">{animal.nombre}</div>
-                              <div className="animal-id">{animal.id}</div>
+                              <div className="animal-nombre">{animal.name}</div>
+                              <div className="animal-id">{codigoAnimal(animal.id)}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="text-muted">{animal.especie} · {animal.edad}</td>
+                        <td className="text-muted">{animal.species} · {textoEdad(animal.api.edadMeses)}</td>
                         <td>
-                          <span className={`badge ${animal.saludClase}`}>{animal.salud}</span>
+                          <span className={`badge ${saludAnimal(animal).clase}`}>{saludAnimal(animal).texto}</span>
                         </td>
                         <td>
-                          <span className={`badge ${animal.estadoClase}`}>{animal.estado}</span>
+                          <span className={`badge ${ETIQUETA_ESTADO[animal.status].clase}`}>{ETIQUETA_ESTADO[animal.status].texto}</span>
                         </td>
                         <td>
                           <div className="action-cell">
-                            <button className="btn-text-success" onClick={() => proximamente('Edición', animal.nombre)}>Editar</button>
-                            <button className="btn-text-success" onClick={() => proximamente('Historial médico', animal.nombre)}>Salud</button>
-                            <IonButton fill="clear" color="medium" className="btn-more" onClick={() => proximamente('Más opciones', animal.nombre)}>
+                            <button className="btn-text-success" onClick={() => router.push(`/admin/animales/${animal.id}/editar`)}>Editar</button>
+                            {botonPublicar(animal, 'btn-text-success')}
+                            <IonButton fill="clear" color="medium" className="btn-more" aria-label={`Más opciones de ${animal.name}`} onClick={() => setOpcionesDe(animal)}>
                               <IonIcon icon={ellipsisHorizontal} />
                             </IonButton>
                           </div>
@@ -152,26 +209,26 @@ const AnimalesAdmin: React.FC = () => {
 
                 <div className="mobile-tabs-scroll">
                   <button className={`mobile-tab ${estado === 'TODOS' ? 'active' : ''}`} onClick={() => setEstado('TODOS')}>Todos · {animales.length}</button>
-                  <button className={`mobile-tab ${estado === 'PUBLICADO' ? 'active' : ''}`} onClick={() => setEstado('PUBLICADO')}>Publicados · {animales.filter((a) => a.estado === 'PUBLICADO').length}</button>
-                  <button className={`mobile-tab ${estado === 'BORRADOR' ? 'active' : ''}`} onClick={() => setEstado('BORRADOR')}>Borrador · {animales.filter((a) => a.estado === 'BORRADOR').length}</button>
+                  <button className={`mobile-tab ${estado === 'DISPONIBLE' ? 'active' : ''}`} onClick={() => setEstado('DISPONIBLE')}>Publicados · {contar('DISPONIBLE')}</button>
+                  <button className={`mobile-tab ${estado === 'BORRADOR' ? 'active' : ''}`} onClick={() => setEstado('BORRADOR')}>Borrador · {contar('BORRADOR')}</button>
                 </div>
                 
                 {animalesVisibles.map((animal) => (
                   <div className="mobile-card" key={animal.id}>
                     <div className="mobile-card-header">
                       <div className="animal-cell">
-                        <img src={animal.img} alt={animal.nombre} className="animal-avatar" />
+                        <img src={animal.image} alt={animal.name} className="animal-avatar" />
                         <div>
-                          <div className="animal-nombre">{animal.nombre}</div>
-                          <div className="animal-id">{animal.especie} · {animal.edad}</div>
+                          <div className="animal-nombre">{animal.name}</div>
+                          <div className="animal-id">{animal.species} · {textoEdad(animal.api.edadMeses)}</div>
                         </div>
                       </div>
-                      <span className={`badge ${animal.estadoClase}`}>{animal.estado}</span>
+                      <span className={`badge ${ETIQUETA_ESTADO[animal.status].clase}`}>{ETIQUETA_ESTADO[animal.status].texto}</span>
                     </div>
                     <div className="mobile-card-actions-row">
-                      <button className="btn-text-success font-bold" onClick={() => proximamente('Edición', animal.nombre)}>Editar</button>
-                      <button className="btn-text-success font-bold" onClick={() => proximamente('Historial médico', animal.nombre)}>Historial</button>
-                      <IonButton fill="clear" color="medium" onClick={() => proximamente('Más opciones', animal.nombre)}>
+                      <button className="btn-text-success font-bold" onClick={() => router.push(`/admin/animales/${animal.id}/editar`)}>Editar</button>
+                      {botonPublicar(animal, 'btn-text-success font-bold')}
+                      <IonButton fill="clear" color="medium" aria-label={`Más opciones de ${animal.name}`} onClick={() => setOpcionesDe(animal)}>
                         <IonIcon icon={ellipsisHorizontal} />
                       </IonButton>
                     </div>
@@ -179,7 +236,7 @@ const AnimalesAdmin: React.FC = () => {
                 ))}
                 
                 <div className="mobile-info-box">
-                  <strong>26 animales registrados</strong>
+                  <strong>{animales.length} animales registrados</strong>
                   <p>Mantén sus fichas y datos médicos actualizados para mejorar cada proceso.</p>
                   <p className="text-small">Crear, editar y eliminar desde esta vista.</p>
                 </div>
@@ -188,6 +245,30 @@ const AnimalesAdmin: React.FC = () => {
             </IonCol>
           </IonRow>
         </IonGrid>
+
+        <IonActionSheet
+          isOpen={opcionesDe !== null}
+          header={opcionesDe ? `${opcionesDe.name} · ${codigoAnimal(opcionesDe.id)}` : ''}
+          onDidDismiss={() => setOpcionesDe(null)}
+          buttons={opcionesDe ? [
+            ...(opcionesDe.status === 'DISPONIBLE' ? [{ text: 'Ver en el catálogo', handler: () => router.push(`/animales/${opcionesDe.id}`) }] : []),
+            { text: 'Editar ficha', handler: () => router.push(`/admin/animales/${opcionesDe.id}/editar`) },
+            ...(opcionesDe.status !== 'ARCHIVADO' ? [{ text: 'Archivar', handler: () => { cambiarEstado(opcionesDe, 'ARCHIVADO'); } }] : []),
+            { text: 'Eliminar ficha', role: 'destructive', handler: () => setEliminarA(opcionesDe) },
+            { text: 'Cancelar', role: 'cancel' }
+          ] : []}
+        />
+
+        <IonAlert
+          isOpen={eliminarA !== null}
+          header="Eliminar ficha"
+          message={eliminarA ? `¿Eliminar definitivamente la ficha de ${eliminarA.name}? Si tiene postulaciones, archívala en su lugar.` : ''}
+          buttons={[
+            { text: 'Cancelar', role: 'cancel' },
+            { text: 'Eliminar', role: 'destructive', handler: () => { if (eliminarA) eliminar(eliminarA); } }
+          ]}
+          onDidDismiss={() => setEliminarA(null)}
+        />
 
         <IonToast isOpen={mensaje !== ''} message={mensaje} duration={2500} onDidDismiss={() => setMensaje('')} />
       </IonContent>

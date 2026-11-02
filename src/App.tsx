@@ -165,6 +165,14 @@ const App: React.FC = () => (
           }
         />
         <Route
+          path="/admin/animales/:id/editar"
+          element={
+            <ProtectedRoute allowedRole="admin">
+              <NuevaFichaAdmin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admin/agenda"
           element={
             <ProtectedRoute allowedRole="admin">

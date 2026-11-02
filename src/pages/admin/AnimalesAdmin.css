@@ -89,6 +89,9 @@
 .salud-control { color: #0369a1; }
 .estado-publicado { background-color: #dcfce7; color: #15803d; }
 .estado-borrador { background-color: #f4f5f7; color: #666; }
+.estado-reservado { background-color: #e0f2fe; color: #0369a1; }
+.estado-adoptado { background-color: #fef0c7; color: #b45309; }
+.estado-archivado { background-color: #fee2e2; color: #b91c1c; }
 
 .action-cell { display: flex; gap: 15px; align-items: center; justify-content: flex-start; }
 .btn-text-success { background: transparent; border: none; color: #15803d; font-weight: 600; font-size: 0.85rem; cursor: pointer; padding: 0; }

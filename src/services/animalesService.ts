@@ -115,3 +115,25 @@ export const agregarFavorito = async (id: number) => {
 export const quitarFavorito = async (id: number) => {
   await api.delete(`/favoritos/${id}`);
 };
+
+// Datos que envía el formulario de ficha del refugio
+export type DatosAnimal = Pick<AnimalApi, 'nombre' | 'especie' | 'raza' | 'sexo' | 'edadMeses' | 'tamano' | 'estado' | 'descripcion' | 'salud' | 'vacunado' | 'esterilizado' | 'fotoUrl'>;
+
+export const crearAnimal = async (datos: DatosAnimal) => {
+  const { data } = await api.post<RespuestaItem<AnimalApi>>('/animales', datos);
+  return aAnimal(data.data);
+};
+
+export const actualizarAnimal = async (id: number, datos: DatosAnimal) => {
+  const { data } = await api.put<RespuestaItem<AnimalApi>>(`/animales/${id}`, datos);
+  return aAnimal(data.data);
+};
+
+export const cambiarEstadoAnimal = async (id: number, estado: EstadoAnimal) => {
+  const { data } = await api.patch<RespuestaItem<AnimalApi>>(`/animales/${id}/estado`, { estado });
+  return aAnimal(data.data);
+};
+
+export const eliminarAnimal = async (id: number) => {
+  await api.delete(`/animales/${id}`);
+};

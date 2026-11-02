@@ -2,33 +2,74 @@ import React, { useState } from 'react';
 import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton, IonIcon, IonToast } from '@ionic/react';
 import { ellipsisHorizontal, searchOutline } from 'ionicons/icons';
 import { MenuLateralAdmin, BarraInferiorAdmin } from '../../components/MenuAdmin';
+import EstadoCarga from '../../components/EstadoCarga';
+import { obtenerPostulacionesRefugio, ETIQUETA_ESTADO, EstadoPostulacion, Postulacion } from '../../services/postulacionesService';
+import { useCarga } from '../../hooks/useCarga';
 import './SolicitudesAdmin.css';
 
-const SolicitudesAdmin: React.FC = () => {
+const ESTILO_ESTADO: Record<EstadoPostulacion, { clase: string; fondo: string; texto: string; accion: string }> = {
+  PENDIENTE: { clase: 'estado-pendiente', fondo: '#fef0c7', texto: '#b45309', accion: 'Revisar' },
+  EN_REVISION: { clase: 'estado-revision', fondo: '#e0f2fe', texto: '#0369a1', accion: 'Preseleccionar' },
+  ACEPTADA_EN_PROCESO: { clase: 'estado-entrevista', fondo: '#dcfce7', texto: '#15803d', accion: 'Gestionar' },
+  ADOPCION_COMPLETADA: { clase: 'estado-entrevista', fondo: '#dcfce7', texto: '#15803d', accion: 'Ver' },
+  RECHAZADA: { clase: 'estado-rechazada', fondo: '#fee2e2', texto: '#b91c1c', accion: 'Ver' }
+};
 
-  const [solicitudes] = useState([
-    { id: 1, iniciales: 'TG', colorAvatar: '#fef0c7', colorTexto: '#b45309', nombre: 'Tomás Guerra', rut: 'RUT •• 285.432-1', animal: 'Milo', fecha: '14 sep', estado: 'PENDIENTE', estadoClase: 'estado-pendiente', accion: 'Revisar' },
-    { id: 2, iniciales: 'CM', colorAvatar: '#e0f2fe', colorTexto: '#0369a1', nombre: 'Camila Morales', rut: 'RUT •• 456.789-0', animal: 'Milo', fecha: '13 sep', estado: 'EN REVISIÓN', estadoClase: 'estado-revision', accion: 'Preseleccionar' },
-    { id: 3, iniciales: 'JP', colorAvatar: '#dcfce7', colorTexto: '#15803d', nombre: 'Javier Pérez', rut: 'RUT •• 345.678-9', animal: 'Simón', fecha: '12 sep', estado: 'ENTREVISTA AGENDADA', estadoClase: 'estado-entrevista', accion: 'Ver agenda' },
-    { id: 4, iniciales: 'AV', colorAvatar: '#fee2e2', colorTexto: '#b91c1c', nombre: 'Ana Vera', rut: 'RUT •• 234.567-8', animal: 'Milo', fecha: '11 sep', estado: 'RECHAZADA', estadoClase: 'estado-rechazada', accion: 'Revisar' }
-  ]);
+const iniciales = (nombre: string) => nombre.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join('');
+// Solo se muestran los últimos dígitos del RUT para proteger el dato en el listado
+const rutProtegido = (rut: string) => `RUT •• ${rut.slice(-9)}`;
+const cargarSolicitudes = () => obtenerPostulacionesRefugio();
+
+// Genera un CSV con las solicitudes visibles y lo descarga en el navegador
+const exportarCsv = (solicitudes: Postulacion[]) => {
+  const celda = (valor: string) => `"${valor.replace(/"/g, '""')}"`;
+  const filas = [
+    ['ID', 'Postulante', 'Correo', 'Animal', 'Fecha', 'Estado', 'Comuna'],
+    ...solicitudes.map((s) => [String(s.id), s.postulante, s.postulanteEmail, s.animal, s.fecha, ETIQUETA_ESTADO[s.estado].texto, s.comuna])
+  ];
+  const csv = '﻿' + filas.map((f) => f.map(celda).join(';')).join('\n');
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  const enlace = document.createElement('a');
+  enlace.href = url;
+  enlace.download = `solicitudes-${new Date().toISOString().slice(0, 10)}.csv`;
+  enlace.click();
+  URL.revokeObjectURL(url);
+};
+
+const SolicitudesAdmin: React.FC = () => {
+  const { datos, cargando, error, recargar } = useCarga(cargarSolicitudes);
+  const solicitudes = datos ?? [];
   const [busqueda, setBusqueda] = useState('');
-  const [estado, setEstado] = useState('Todos');
+  const [estado, setEstado] = useState<'Todos' | EstadoPostulacion>('Todos');
   const [animal, setAnimal] = useState('Todos');
   const [mensaje, setMensaje] = useState('');
   const [tabMovil, setTabMovil] = useState<'Pendientes' | 'En revisión' | 'Cerradas'>('Pendientes');
 
-  const ESTADOS = ['Todos', ...Array.from(new Set(solicitudes.map((s) => s.estado)))];
+  const ESTADOS: ('Todos' | EstadoPostulacion)[] = ['Todos', ...Array.from(new Set(solicitudes.map((s) => s.estado)))];
   const ANIMALES = ['Todos', ...Array.from(new Set(solicitudes.map((s) => s.animal)))];
-  const siguiente = (lista: string[], actual: string) => lista[(lista.indexOf(actual) + 1) % lista.length];
+  const siguiente = <T,>(lista: T[], actual: T) => lista[(lista.indexOf(actual) + 1) % lista.length];
   const texto = busqueda.trim().toLowerCase();
   const solicitudesVisibles = solicitudes.filter((s) =>
-    (texto === '' || `${s.nombre} ${s.animal}`.toLowerCase().includes(texto)) &&
+    (texto === '' || `${s.postulante} ${s.animal}`.toLowerCase().includes(texto)) &&
     (estado === 'Todos' || s.estado === estado) &&
     (animal === 'Todos' || s.animal === animal)
   );
-  const ESTADOS_TAB = { 'Pendientes': ['PENDIENTE'], 'En revisión': ['EN REVISIÓN', 'ENTREVISTA AGENDADA'], 'Cerradas': ['RECHAZADA'] };
+  const ESTADOS_TAB: Record<typeof tabMovil, EstadoPostulacion[]> = {
+    'Pendientes': ['PENDIENTE'],
+    'En revisión': ['EN_REVISION', 'ACEPTADA_EN_PROCESO'],
+    'Cerradas': ['RECHAZADA', 'ADOPCION_COMPLETADA']
+  };
   const solicitudesMovil = solicitudesVisibles.filter((s) => ESTADOS_TAB[tabMovil].includes(s.estado));
+  const contar = (e: EstadoPostulacion) => solicitudes.filter((s) => s.estado === e).length;
+
+  const exportar = () => {
+    if (solicitudesVisibles.length === 0) {
+      setMensaje('No hay solicitudes para exportar con los filtros actuales');
+      return;
+    }
+    exportarCsv(solicitudesVisibles);
+    setMensaje(`Resumen exportado: ${solicitudesVisibles.length} solicitudes`);
+  };
 
 
   return (
@@ -51,7 +92,7 @@ const SolicitudesAdmin: React.FC = () => {
                   <h1 className="admin-page-title">Gestión de solicitudes</h1>
                   <p className="admin-page-subtitle">Revisa antecedentes, preselecciona y deja que PatitasGo coordine los horarios.</p>
                 </div>
-                <IonButton fill="outline" color="dark" className="btn-export" onClick={() => setMensaje('Resumen exportado: 4 solicitudes (la descarga real se habilita con el backend en EP2).')}>
+                <IonButton fill="outline" color="dark" className="btn-export" onClick={exportar}>
                   Exportar resumen
                 </IonButton>
               </div>
@@ -59,19 +100,19 @@ const SolicitudesAdmin: React.FC = () => {
               {/* Tarjetas de Estadísticas */}
               <div className="stats-cards-container">
                 <div className="admin-stat-card">
-                  <h3>12</h3>
+                  <h3>{contar('PENDIENTE')}</h3>
                   <p>Pendientes</p>
                 </div>
                 <div className="admin-stat-card bg-blue">
-                  <h3>5</h3>
+                  <h3>{contar('EN_REVISION')}</h3>
                   <p>En revisión</p>
                 </div>
                 <div className="admin-stat-card bg-green">
-                  <h3>8</h3>
+                  <h3>{contar('ACEPTADA_EN_PROCESO')}</h3>
                   <p>Entrevistas</p>
                 </div>
                 <div className="admin-stat-card bg-red">
-                  <h3>3</h3>
+                  <h3>{contar('RECHAZADA')}</h3>
                   <p>Rechazadas</p>
                 </div>
               </div>
@@ -83,13 +124,18 @@ const SolicitudesAdmin: React.FC = () => {
                   <input type="text" placeholder="Buscar por persona o animal" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
                 </div>
                 <div className="filter-buttons">
-                  <button className="filter-btn" onClick={() => setEstado(siguiente(ESTADOS, estado))}>Estado: {estado}</button>
+                  <button className="filter-btn" onClick={() => setEstado(siguiente(ESTADOS, estado))}>Estado: {estado === 'Todos' ? 'Todos' : ETIQUETA_ESTADO[estado].texto}</button>
                   <button className="filter-btn" onClick={() => setAnimal(siguiente(ANIMALES, animal))}>Animal: {animal}</button>
                 </div>
                 <div className="update-label">
                   <span>Actualizado hoy</span>
                 </div>
               </div>
+
+              <EstadoCarga cargando={cargando} error={error} onReintentar={recargar} />
+              {datos && solicitudesVisibles.length === 0 && (
+                <p className="text-muted">{solicitudes.length === 0 ? 'Aún no llegan solicitudes a tu refugio.' : 'Ninguna solicitud coincide con los filtros.'}</p>
+              )}
 
               {/* --- VISTA DESKTOP: TABLA --- */}
               <div className="desktop-table-container">
@@ -108,31 +154,25 @@ const SolicitudesAdmin: React.FC = () => {
                       <tr key={sol.id}>
                         <td>
                           <div className="postulante-cell">
-                            <div className="avatar" style={{ backgroundColor: sol.colorAvatar, color: sol.colorTexto }}>
-                              {sol.iniciales}
+                            <div className="avatar" style={{ backgroundColor: ESTILO_ESTADO[sol.estado].fondo, color: ESTILO_ESTADO[sol.estado].texto }}>
+                              {iniciales(sol.postulante)}
                             </div>
                             <div>
-                              <div className="postulante-nombre">{sol.nombre}</div>
-                              <div className="postulante-rut">{sol.rut}</div>
+                              <div className="postulante-nombre">{sol.postulante}</div>
+                              <div className="postulante-rut">{rutProtegido(sol.rut)}</div>
                             </div>
                           </div>
                         </td>
                         <td className="text-dark font-medium">{sol.animal}</td>
                         <td className="text-muted">{sol.fecha}</td>
                         <td>
-                          <span className={`badge ${sol.estadoClase}`}>{sol.estado}</span>
+                          <span className={`badge ${ESTILO_ESTADO[sol.estado].clase}`}>{ETIQUETA_ESTADO[sol.estado].texto}</span>
                         </td>
                         <td>
                           <div className="action-cell">
-                            {sol.accion === 'Ver agenda' ? (
-                              <IonButton color="success" className="btn-action-table" routerLink="/admin/agenda">
-                                Ver agenda
-                              </IonButton>
-                            ) : (
-                              <IonButton color="success" className="btn-action-table" routerLink={`/admin/solicitudes/${sol.id}`}>
-                                {sol.accion}
-                              </IonButton>
-                            )}
+                            <IonButton color="success" className="btn-action-table" routerLink={`/admin/solicitudes/${sol.id}`}>
+                              {ESTILO_ESTADO[sol.estado].accion}
+                            </IonButton>
                             <IonButton fill="outline" color="medium" className="btn-more" routerLink={`/admin/solicitudes/${sol.id}`}>
                               <IonIcon icon={ellipsisHorizontal} />
                             </IonButton>
@@ -158,17 +198,17 @@ const SolicitudesAdmin: React.FC = () => {
                   <div className="mobile-card" key={sol.id}>
                     <div className="mobile-card-header">
                       <div className="postulante-cell">
-                        <div className="avatar" style={{ backgroundColor: sol.colorAvatar, color: sol.colorTexto }}>{sol.iniciales}</div>
+                        <div className="avatar" style={{ backgroundColor: ESTILO_ESTADO[sol.estado].fondo, color: ESTILO_ESTADO[sol.estado].texto }}>{iniciales(sol.postulante)}</div>
                         <div>
-                          <div className="postulante-nombre">{sol.nombre}</div>
+                          <div className="postulante-nombre">{sol.postulante}</div>
                           <div className="postulante-rut">Postula por {sol.animal} - {sol.fecha}</div>
                         </div>
                       </div>
-                      <span className={`badge ${sol.estadoClase}`}>{sol.estado}</span>
+                      <span className={`badge ${ESTILO_ESTADO[sol.estado].clase}`}>{ETIQUETA_ESTADO[sol.estado].texto}</span>
                     </div>
-                    <p className="mobile-card-detail">{sol.rut} - contacto protegido</p>
+                    <p className="mobile-card-detail">{rutProtegido(sol.rut)} - contacto protegido</p>
                     <div className="mobile-card-actions">
-                      <IonButton color="success" expand="block" className="btn-action-mobile" routerLink={sol.accion === 'Ver agenda' ? '/admin/agenda' : `/admin/solicitudes/${sol.id}`}>{sol.accion}</IonButton>
+                      <IonButton color="success" expand="block" className="btn-action-mobile" routerLink={`/admin/solicitudes/${sol.id}`}>{ESTILO_ESTADO[sol.estado].accion}</IonButton>
                       <IonButton fill="outline" color="dark" expand="block" className="btn-action-mobile" routerLink={`/admin/solicitudes/${sol.id}`}>Ver ficha</IonButton>
                     </div>
                   </div>
