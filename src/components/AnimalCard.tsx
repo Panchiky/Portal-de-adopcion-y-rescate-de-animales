@@ -1,6 +1,6 @@
 import React from 'react';
 import { IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonBadge } from '@ionic/react';
-import { Animal } from '../services/animalesService';
+import { Animal, ubicacionAnimal } from '../services/animalesService';
 
 interface AnimalCardProps {
   animal: Animal;
@@ -16,7 +16,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animal, children }) => (
       <IonCardSubtitle>{animal.species} • {animal.age} • {animal.size}</IonCardSubtitle>
     </IonCardHeader>
     <IonCardContent>
-      {animal.shelter} • {animal.location} • {animal.distance}
+      {ubicacionAnimal(animal)}
       {children}
     </IonCardContent>
   </IonCard>

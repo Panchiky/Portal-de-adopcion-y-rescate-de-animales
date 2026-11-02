@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
 import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonInput, IonButton, IonIcon, IonToast, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonList, IonItem, IonSelect, IonSelectOption, useIonRouter } from '@ionic/react';
-import { heart } from 'ionicons/icons';
-import { obtenerAnimales, alternarFavorito } from '../../services/animalesService';
-import { estaAutenticado } from '../../services/authService';
+import { heart, heartOutline } from 'ionicons/icons';
+import { obtenerAnimales, obtenerFavoritos, agregarFavorito, quitarFavorito, ubicacionAnimal } from '../../services/animalesService';
+import { estaAutenticado, obtenerRol } from '../../services/authService';
+import { mensajeError } from '../../services/api';
+import { useCarga } from '../../hooks/useCarga';
+import EstadoCarga from '../../components/EstadoCarga';
 import { MenuLateralUsuario, BarraInferiorUsuario } from '../../components/MenuUsuario';
 import './Explorar.css';
 
-const ANIMALS_DATA = obtenerAnimales();
+// Animales disponibles desde la API y, si hay sesión de usuario, sus favoritos
+const cargarCatalogo = async () => {
+  const esUsuario = estaAutenticado() && obtenerRol() === 'user';
+  const [animales, favoritos] = await Promise.all([obtenerAnimales(), esUsuario ? obtenerFavoritos() : Promise.resolve([])]);
+  return { animales, favoritos: favoritos.map((f) => f.id) };
+};
 
 const Explorar: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -16,6 +24,9 @@ const Explorar: React.FC = () => {
   const [tamano, setTamano] = useState('TODOS');
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
   const router = useIonRouter();
+  const { datos, setDatos, cargando, error, recargar } = useCarga(cargarCatalogo);
+  const ANIMALS_DATA = datos?.animales ?? [];
+  const favoritos = datos?.favoritos ?? [];
 
   const texto = busqueda.trim().toLowerCase();
   const animalesFiltrados = ANIMALS_DATA.filter((a) =>
@@ -39,13 +50,31 @@ const Explorar: React.FC = () => {
     setBusqueda('');
   };
 
-  const handleFavorito = () => {
+  const esFavorito = currentAnimal ? favoritos.includes(currentAnimal.id) : false;
+
+  const handleFavorito = async () => {
     if (!estaAutenticado()) {
       router.push('/login');
       return;
     }
-    const agregado = alternarFavorito(currentAnimal.id);
-    setMensaje(agregado ? `${currentAnimal.name} se agregó a tus favoritos` : `${currentAnimal.name} se quitó de tus favoritos`);
+    if (obtenerRol() !== 'user') {
+      setMensaje('Los favoritos están disponibles para cuentas de usuario');
+      return;
+    }
+    try {
+      if (esFavorito) {
+        await quitarFavorito(currentAnimal.id);
+      } else {
+        await agregarFavorito(currentAnimal.id);
+      }
+      setDatos((prev) => prev && {
+        ...prev,
+        favoritos: esFavorito ? prev.favoritos.filter((f) => f !== currentAnimal.id) : [...prev.favoritos, currentAnimal.id],
+      });
+      setMensaje(esFavorito ? `${currentAnimal.name} se quitó de tus favoritos` : `${currentAnimal.name} se agregó a tus favoritos`);
+    } catch (err) {
+      setMensaje(mensajeError(err));
+    }
   };
 
   return (
@@ -69,7 +98,7 @@ const Explorar: React.FC = () => {
                     <p className="page-subtitle">Ficha completa y una siguiente opción, sin gestos de rechazo.</p>
                   </div>
                   <div className="location-badge">
-                    {animalesFiltrados.length} animales • 25 km
+                    {animalesFiltrados.length} animales disponibles
                   </div>
                 </div>
 
@@ -83,7 +112,9 @@ const Explorar: React.FC = () => {
                 </div>
               </div>
 
-              {animalesFiltrados.length === 0 ? (
+              {cargando || error ? (
+                <EstadoCarga cargando={cargando} error={error} onReintentar={recargar} />
+              ) : animalesFiltrados.length === 0 ? (
                 <div className="ion-text-center ion-padding">
                   <h2>No hay animales con esos criterios</h2>
                   <p className="text-muted">Prueba con otra búsqueda o limpia los filtros.</p>
@@ -117,7 +148,7 @@ const Explorar: React.FC = () => {
                     </p>
 
                     <h4 className="section-subtitle">Refugio y ubicación</h4>
-                    <p className="text-muted">{currentAnimal.shelter} • {currentAnimal.location} • {currentAnimal.distance}</p>
+                    <p className="text-muted">{ubicacionAnimal(currentAnimal)}</p>
                     
                     <p className="text-muted">{currentAnimal.health}</p>
 
@@ -127,8 +158,8 @@ const Explorar: React.FC = () => {
 
                     <div className="action-buttons">
                       <IonButton fill="outline" color="dark" className="btn-secondary" onClick={handleFavorito}>
-                        <IonIcon icon={heart} color="danger" slot="start" />
-                        Añadir a favoritos
+                        <IonIcon icon={esFavorito ? heart : heartOutline} color="danger" slot="start" />
+                        {esFavorito ? 'Quitar de favoritos' : 'Añadir a favoritos'}
                       </IonButton>
                       <IonButton fill="outline" color="dark" className="btn-secondary" routerLink={`/animales/${currentAnimal.id}/apadrinar`}>
                         Apadrinar
@@ -148,7 +179,7 @@ const Explorar: React.FC = () => {
                   <div className="next-animal-details">
                     <h3 className="animal-name-small">{nextAnimal.name}</h3>
                     <p className="animal-stats-small">{nextAnimal.species} • {nextAnimal.gender} • {nextAnimal.age}</p>
-                    <p className="text-muted-small">{nextAnimal.shelter} • {nextAnimal.location} • {nextAnimal.distance}</p>
+                    <p className="text-muted-small">{ubicacionAnimal(nextAnimal)}</p>
                     
                     <IonButton expand="block" fill="outline" color="dark" className="btn-ver-ficha" onClick={(e) => { e.stopPropagation(); router.push(`/animales/${nextAnimal.id}`); }}>
                       Ver ficha de {nextAnimal.name} →

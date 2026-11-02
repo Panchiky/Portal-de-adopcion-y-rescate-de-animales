@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { IonSegment, IonSegmentButton, IonLabel, IonInput, IonButton, IonText, IonAlert } from '@ionic/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import UsuarioLayout from '../../components/UsuarioLayout';
 import { obtenerAnimal } from '../../services/animalesService';
+import { useCarga } from '../../hooks/useCarga';
 
 const MONTO_MINIMO = 3000;
 
 const Apadrinar: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const animal = obtenerAnimal(Number(id));
+  const cargar = useCallback(() => obtenerAnimal(Number(id)), [id]);
+  const { datos: animal } = useCarga(cargar);
   const [frecuencia, setFrecuencia] = useState<'UNICO' | 'MENSUAL'>('MENSUAL');
   const [monto, setMonto] = useState('');
   const [confirmar, setConfirmar] = useState(false);

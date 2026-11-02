@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { IonBadge, IonList, IonItem, IonLabel, IonText, IonButton, IonAlert, IonToast } from '@ionic/react';
 import { useParams } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
-import { obtenerPostulacion, ETIQUETA_ESTADO, EstadoPostulacion } from '../../services/postulacionesService';
+import EstadoCarga from '../../components/EstadoCarga';
+import { obtenerPostulacion, cambiarEstadoPostulacion, ETIQUETA_ESTADO, EstadoPostulacion } from '../../services/postulacionesService';
+import { mensajeError } from '../../services/api';
+import { useCarga } from '../../hooks/useCarga';
 
 const TRANSICIONES: Record<EstadoPostulacion, EstadoPostulacion[]> = {
   PENDIENTE: ['EN_REVISION', 'RECHAZADA'],
@@ -14,27 +17,36 @@ const TRANSICIONES: Record<EstadoPostulacion, EstadoPostulacion[]> = {
 
 const DetalleSolicitudAdmin: React.FC = () => {
   const { id } = useParams();
-  const postulacion = obtenerPostulacion(Number(id));
-  const [estado, setEstado] = useState<EstadoPostulacion | undefined>(postulacion?.estado);
+  const cargar = useCallback(() => obtenerPostulacion(Number(id)), [id]);
+  const { datos: postulacion, setDatos, cargando, error, recargar } = useCarga(cargar);
   const [destino, setDestino] = useState<EstadoPostulacion | null>(null);
   const [mensaje, setMensaje] = useState('');
 
-  if (!postulacion || !estado) {
+  if (!postulacion) {
     return (
       <AdminLayout titulo="Solicitud" volverA="/admin/solicitudes">
-        <IonText><p>No encontramos esta solicitud.</p></IonText>
+        {cargando || error
+          ? <EstadoCarga cargando={cargando} error={error} onReintentar={recargar} />
+          : <IonText><p>No encontramos esta solicitud.</p></IonText>}
       </AdminLayout>
     );
   }
 
+  const estado = postulacion.estado;
+
   const aplicarTransicion = (motivo?: string) => {
     if (!destino) return;
-    if (destino === 'RECHAZADA' && !motivo?.trim()) {
-      setMensaje('Debes ingresar un motivo para rechazar');
+    if (destino === 'RECHAZADA' && (motivo?.trim().length ?? 0) < 10) {
+      setMensaje('Debes ingresar un motivo de al menos 10 caracteres para rechazar');
       return false;
     }
-    setEstado(destino);
-    setMensaje(`Solicitud actualizada a "${ETIQUETA_ESTADO[destino].texto}"`);
+    const nuevoEstado = destino;
+    cambiarEstadoPostulacion(postulacion.id, nuevoEstado, motivo?.trim())
+      .then((actualizada) => {
+        setDatos(actualizada);
+        setMensaje(`Solicitud actualizada a "${ETIQUETA_ESTADO[nuevoEstado].texto}"`);
+      })
+      .catch((err) => setMensaje(mensajeError(err)));
   };
 
   return (
@@ -44,9 +56,14 @@ const DetalleSolicitudAdmin: React.FC = () => {
 
       <IonList inset>
         <IonItem><IonLabel><p>RUT</p><h3>{postulacion.rut}</h3></IonLabel></IonItem>
+        <IonItem><IonLabel><p>Contacto</p><h3>{postulacion.postulanteEmail} • {postulacion.telefono}</h3></IonLabel></IonItem>
         <IonItem><IonLabel><p>Animal</p><h3>{postulacion.animal}</h3></IonLabel></IonItem>
         <IonItem><IonLabel><p>Fecha de envío</p><h3>{postulacion.fecha}</h3></IonLabel></IonItem>
+        <IonItem><IonLabel className="ion-text-wrap"><p>Vivienda</p><h3>{postulacion.tipoVivienda} • {postulacion.comuna}</h3></IonLabel></IonItem>
         <IonItem><IonLabel className="ion-text-wrap"><p>Motivación</p><h3>{postulacion.motivacion}</h3></IonLabel></IonItem>
+        {postulacion.motivoRechazo && (
+          <IonItem><IonLabel className="ion-text-wrap"><p>Motivo del rechazo</p><h3>{postulacion.motivoRechazo}</h3></IonLabel></IonItem>
+        )}
       </IonList>
 
       {TRANSICIONES[estado].length === 0 ? (
@@ -64,6 +81,18 @@ const DetalleSolicitudAdmin: React.FC = () => {
           </IonButton>
         ))
       )}
+
+      <h3>Historial</h3>
+      <IonList inset>
+        {postulacion.historial.map((h, index) => (
+          <IonItem key={index}>
+            <IonLabel className="ion-text-wrap">
+              <h3>{h.detalle}</h3>
+              <p>{h.fecha}</p>
+            </IonLabel>
+          </IonItem>
+        ))}
+      </IonList>
 
       <IonAlert
         isOpen={destino !== null}

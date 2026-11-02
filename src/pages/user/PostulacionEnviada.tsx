@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { IonButton, IonIcon, IonText } from '@ionic/react';
 import { checkmarkCircleOutline } from 'ionicons/icons';
 import { useParams } from 'react-router-dom';
 import UsuarioLayout from '../../components/UsuarioLayout';
 import { obtenerAnimal } from '../../services/animalesService';
+import { useCarga } from '../../hooks/useCarga';
 
 const PostulacionEnviada: React.FC = () => {
   const { id } = useParams();
-  const animal = obtenerAnimal(Number(id));
+  const cargar = useCallback(() => obtenerAnimal(Number(id)), [id]);
+  const { datos: animal } = useCarga(cargar);
 
   return (
     <UsuarioLayout titulo="Postulación enviada">

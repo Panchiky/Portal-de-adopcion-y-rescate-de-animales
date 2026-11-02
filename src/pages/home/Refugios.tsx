@@ -1,9 +1,12 @@
 import React from 'react';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton, IonContent, IonList, IonItem, IonLabel, IonBadge, IonText } from '@ionic/react';
 import { obtenerAnimales } from '../../services/animalesService';
+import { useCarga } from '../../hooks/useCarga';
+import EstadoCarga from '../../components/EstadoCarga';
 
 const Refugios: React.FC = () => {
-  const animales = obtenerAnimales();
+  const { datos, cargando, error, recargar } = useCarga(obtenerAnimales);
+  const animales = datos ?? [];
   const refugios = Array.from(new Set(animales.map((a) => a.shelter))).map((nombre) => {
     const delRefugio = animales.filter((a) => a.shelter === nombre);
     return { nombre, comuna: delRefugio[0].location, disponibles: delRefugio.filter((a) => a.status === 'DISPONIBLE').length };
@@ -24,6 +27,7 @@ const Refugios: React.FC = () => {
           <IonText color="medium">
             <p>Refugios que publican animales en PatitasGo. La dirección exacta se comparte solo al coordinar una entrevista.</p>
           </IonText>
+          <EstadoCarga cargando={cargando} error={error} onReintentar={recargar} />
           <IonList inset>
             {refugios.map((r) => (
               <IonItem key={r.nombre} button detail routerLink="/catalogo">
