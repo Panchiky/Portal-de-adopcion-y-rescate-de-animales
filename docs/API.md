@@ -45,7 +45,7 @@ El rol y el refugio viajan dentro del token (`sub`, `rol`, `refugioId`). Un admi
 | --- | --- | --- | --- | --- |
 | POST | `/auth/registro` | Público | Crea una cuenta `USUARIO` y devuelve token | 201 · 400 · 409 · 429 |
 | POST | `/auth/login` | Público | Inicia sesión y devuelve token | 200 · 400 · 401 · 429 |
-| GET | `/auth/perfil` | Con token | Datos del usuario del token | 200 · 401 |
+| GET | `/auth/perfil` | Con token | Datos del usuario del token, con el nombre de su refugio si es admin | 200 · 401 |
 | PATCH | `/auth/perfil` | Con token | Edita `nombre`, `apellido`, `telefono` y `comuna` (solo los campos enviados). El correo y el rol no se pueden cambiar | 200 · 400 · 401 |
 | PATCH | `/auth/password` | Con token | Cambia la contraseña. Pide `passwordActual` y `passwordNueva` | 200 · 400 · 401 · 429 |
 

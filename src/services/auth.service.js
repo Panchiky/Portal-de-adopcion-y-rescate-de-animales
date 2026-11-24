@@ -16,6 +16,7 @@ function usuarioPublico(fila) {
     email: fila.email,
     rol: fila.rol,
     refugioId: fila.refugio_id,
+    refugio: fila.refugio || null,
     telefono: fila.telefono,
     comuna: fila.comuna,
   };
@@ -49,9 +50,11 @@ async function registrar({ nombre, apellido, email, password, telefono, comuna }
 
 async function login({ email, password }) {
   const { rows } = await db.query(
-    `SELECT u.id, u.nombre, u.apellido, u.email, u.password_hash, u.refugio_id, u.telefono, u.comuna, r.nombre AS rol
+    `SELECT u.id, u.nombre, u.apellido, u.email, u.password_hash, u.refugio_id, u.telefono, u.comuna,
+            r.nombre AS rol, rf.nombre AS refugio
      FROM usuarios u
      JOIN roles r ON r.id = u.rol_id
+     LEFT JOIN refugios rf ON rf.id = u.refugio_id
      WHERE LOWER(u.email) = $1`,
     [email],
   );
@@ -68,9 +71,11 @@ async function login({ email, password }) {
 
 async function obtenerPerfil(id) {
   const { rows } = await db.query(
-    `SELECT u.id, u.nombre, u.apellido, u.email, u.refugio_id, u.telefono, u.comuna, r.nombre AS rol
+    `SELECT u.id, u.nombre, u.apellido, u.email, u.refugio_id, u.telefono, u.comuna,
+            r.nombre AS rol, rf.nombre AS refugio
      FROM usuarios u
      JOIN roles r ON r.id = u.rol_id
+     LEFT JOIN refugios rf ON rf.id = u.refugio_id
      WHERE u.id = $1`,
     [id],
   );
