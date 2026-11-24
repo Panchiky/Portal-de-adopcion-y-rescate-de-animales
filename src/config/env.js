@@ -26,6 +26,12 @@ module.exports = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
   },
+  // Servicio externo de mapas (OpenStreetMap Nominatim). No requiere clave, pero sí identificar la app
+  geocodificacion: {
+    url: process.env.GEOCODING_URL || 'https://nominatim.openstreetmap.org',
+    userAgent: process.env.GEOCODING_USER_AGENT || 'PatitasGo/1.0 (proyecto academico PUCV)',
+    timeoutMs: Number(process.env.GEOCODING_TIMEOUT_MS) || 5000,
+  },
   // Cantidad de proxies delante de la API (0 en local). Permite que el límite de intentos cuente la IP real
   trustProxy: Number(process.env.TRUST_PROXY) || 0,
   jwt: {

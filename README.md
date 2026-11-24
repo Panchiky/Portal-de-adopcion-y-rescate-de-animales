@@ -36,6 +36,8 @@ backend/
 │   ├── app.js              # Configuración de Express
 │   └── server.js           # Punto de entrada
 ├── .env.example
+├── Dockerfile              # Imagen de la API
+├── docker-compose.yml      # Base de datos + API + frontend con un solo comando
 └── package.json
 ```
 
@@ -125,6 +127,9 @@ Incluye claves foráneas, restricciones `CHECK` en los estados, índices en las 
 | `JWT_SECRET` | *(texto largo y aleatorio)* | Clave para firmar los tokens, mínimo 32 caracteres |
 | `JWT_EXPIRES_IN` | `2h` | Duración del token |
 | `TRUST_PROXY` | `0` | Cantidad de proxies delante de la API (0 en local) |
+| `GEOCODING_URL` | `https://nominatim.openstreetmap.org` | Servicio externo de mapas (opcional, ese es el valor por defecto) |
+| `GEOCODING_USER_AGENT` | `PatitasGo/1.0 (proyecto academico PUCV)` | Identificación que exige Nominatim (opcional) |
+| `GEOCODING_TIMEOUT_MS` | `5000` | Tiempo máximo de espera al servicio de mapas (opcional) |
 
 > **Seguridad:** nunca subir secretos al repositorio. El archivo `.env` está en `.gitignore` y solo se versiona `.env.example`, sin valores reales.
 
@@ -149,11 +154,41 @@ Todas las rutas parten de `http://localhost:3000/api`. El detalle de cada endpoi
 | Recurso | Endpoints | Acceso |
 | --- | --- | --- |
 | Estado | `GET /health` | Público |
+| Refugios (API externa) | `GET /refugios/:id/ubicacion` | Público |
 | Autenticación | `POST /auth/registro`, `POST /auth/login`, `GET /auth/perfil`, `PATCH /auth/perfil`, `PATCH /auth/password` | Público y con token |
 | Animales | `GET /animales`, `GET /animales/:id`, `GET /animales/gestion`, `POST /animales`, `PUT /animales/:id`, `PATCH /animales/:id`, `PATCH /animales/:id/estado`, `DELETE /animales/:id` | Catálogo público y gestión `ADMIN` |
 | Postulaciones | `POST /postulaciones`, `GET /postulaciones/mias`, `GET /postulaciones`, `GET /postulaciones/:id`, `PATCH /postulaciones/:id/estado`, `DELETE /postulaciones/:id` | `USUARIO` y `ADMIN` |
 | Favoritos | `GET /favoritos`, `POST /favoritos/:animalId`, `DELETE /favoritos/:animalId` | `USUARIO` |
 | Notificaciones | `GET /notificaciones`, `PATCH /notificaciones/:id/leida` | Con token |
+
+## API externa: mapa del refugio (OpenStreetMap)
+
+La ficha de cada animal muestra un mapa con la ubicación de su refugio. La dirección está guardada en la tabla `refugios`, pero las coordenadas no: el endpoint `GET /refugios/:id/ubicacion` las obtiene de **OpenStreetMap Nominatim**, un servicio público y gratuito que no requiere clave.
+
+- Código: `src/services/ubicacion.service.js` (consulta al servicio), `src/controllers/refugios.controller.js` y `src/routes/refugios.routes.js`.
+- Se busca primero la dirección exacta y, si no aparece, el centro de la comuna (`precision: "comuna"`).
+- Las coordenadas se guardan 24 horas en memoria (`cache: true`), porque Nominatim pide no más de una consulta por segundo.
+- Si el servicio externo falla o tarda más de `GEOCODING_TIMEOUT_MS`, la API responde **502** "El servicio de mapas no está disponible en este momento" y el resto de la aplicación sigue funcionando; en el frontend solo se oculta el mapa.
+
+## Ejecución con Docker
+
+Con [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado no hace falta instalar Node ni PostgreSQL: `docker-compose.yml` levanta la base de datos (cargando `schema.sql` y `seed.sql` la primera vez), la API y el frontend.
+
+```bash
+cp .env.example .env      # completar DB_PASSWORD y JWT_SECRET
+docker compose up --build # primera vez (descarga y construye las imágenes)
+```
+
+| Servicio | URL | Contenedor |
+| --- | --- | --- |
+| Frontend | `http://localhost:8100` | `web` (Nginx con el build de Ionic) |
+| API | `http://localhost:3000/api` | `api` (Node 22) |
+| PostgreSQL | `localhost:5433` | `db` (PostgreSQL 16, datos en el volumen `datos_postgres`) |
+
+- `docker compose stop` apaga todo sin borrar datos y `docker compose start` lo vuelve a encender.
+- `docker compose stop db` apaga solo la base de datos (la API responde 503 hasta que vuelve).
+- `docker compose down -v` borra los contenedores **y** los datos, para empezar de cero.
+- El frontend se construye desde la rama `frontend` de GitHub. Para usar una copia local: `FRONTEND_CONTEXT=../ruta-al-frontend docker compose up --build`.
 
 ## Autenticación y roles
 

@@ -1,0 +1,59 @@
+# Despliegue local de PatitasGo: base de datos + API + frontend
+# Uso: copiar .env.example como .env, completar los valores y ejecutar: docker compose up --build
+# Frontend: http://localhost:8100  ·  API: http://localhost:3000/api
+name: patitasgo
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-patitasgo}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en el archivo .env}
+    volumes:
+      # Solo se ejecutan la primera vez, cuando el volumen de datos está vacío
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - datos_postgres:/var/lib/postgresql/data
+    ports:
+      # 5433 en el equipo para no chocar con un PostgreSQL instalado localmente
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Dentro de la red de Docker la base se llama "db" y escucha en 5432
+      DB_HOST: db
+      DB_PORT: 5432
+      PORT: 3000
+      CORS_ORIGIN: http://localhost:8100,http://localhost:5173
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
+  web:
+    build:
+      # Por defecto construye la rama frontend desde GitHub. Para usar una copia local:
+      # FRONTEND_CONTEXT=../patitas-front docker compose up --build
+      context: ${FRONTEND_CONTEXT:-https://github.com/Panchiky/Portal-de-adopcion-y-rescate-de-animales.git#frontend}
+      args:
+        # El navegador llama a la API desde el equipo, por eso es localhost y no "api"
+        VITE_API_URL: http://localhost:3000/api
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8100:80"
+
+volumes:
+  datos_postgres:

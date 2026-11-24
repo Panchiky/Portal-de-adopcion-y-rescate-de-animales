@@ -37,7 +37,33 @@ El rol y el refugio viajan dentro del token (`sub`, `rol`, `refugioId`). Un admi
 
 | Método | Ruta | Acceso | Descripción | Respuesta |
 | --- | --- | --- | --- | --- |
-| GET | `/health` | Público | Estado del servidor y de la conexión a PostgreSQL | 200 |
+| GET | `/health` | Público | Estado del servidor y de la conexión a PostgreSQL | 200 · 503 |
+
+### Refugios (servicio externo OpenStreetMap)
+
+| Método | Ruta | Acceso | Descripción | Respuesta |
+| --- | --- | --- | --- | --- |
+| GET | `/refugios/:id/ubicacion` | Público | Coordenadas del refugio obtenidas desde OpenStreetMap Nominatim a partir de su dirección | 200 · 400 · 404 · 502 |
+
+Ejemplo de respuesta:
+
+```json
+{
+  "ok": true,
+  "data": {
+    "refugioId": 1,
+    "refugio": "Huellas Felices",
+    "direccion": "Av. Brasil 1234, Valparaíso, Valparaíso",
+    "latitud": -33.0472,
+    "longitud": -71.6127,
+    "precision": "direccion",
+    "fuente": "OpenStreetMap (Nominatim)",
+    "cache": false
+  }
+}
+```
+
+`precision` vale `comuna` cuando no se encontró la dirección exacta y se usó el centro de la comuna. `cache: true` indica que la respuesta salió de la memoria de la API sin volver a consultar el servicio externo.
 
 ### Autenticación
 
@@ -200,6 +226,8 @@ PATCH /api/postulaciones/1/estado
 | 409 | Conflicto: correo duplicado, postulación repetida, transición no permitida o animal con postulaciones |
 | 429 | Más de 10 intentos fallidos de login o registro en 15 minutos |
 | 500 | Error interno; se responde un mensaje genérico sin detalles del servidor |
+| 502 | El servicio externo de mapas (OpenStreetMap) falló o no respondió a tiempo |
+| 503 | La API está encendida pero PostgreSQL no responde (apagado o reiniciándose) |
 
 ## Seguridad aplicada
 
