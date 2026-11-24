@@ -1,5 +1,7 @@
 const authService = require('../services/auth.service');
-const { validarRegistro, validarLogin } = require('../utils/validaciones');
+const {
+  validarRegistro, validarLogin, validarPerfil, validarCambioPassword, exigir,
+} = require('../utils/validaciones');
 const HttpError = require('../utils/httpError');
 
 async function registro(req, res, next) {
@@ -37,4 +39,24 @@ async function perfil(req, res, next) {
   }
 }
 
-module.exports = { registro, login, perfil };
+async function actualizarPerfil(req, res, next) {
+  try {
+    const datos = exigir(validarPerfil(req.body), 'Datos del perfil no válidos');
+    const usuario = await authService.actualizarPerfil(req.usuario.id, datos);
+    res.status(200).json({ ok: true, data: usuario });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function cambiarPassword(req, res, next) {
+  try {
+    const datos = exigir(validarCambioPassword(req.body), 'Datos no válidos');
+    await authService.cambiarPassword(req.usuario.id, datos);
+    res.status(200).json({ ok: true, data: { mensaje: 'Contraseña actualizada' } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { registro, login, perfil, actualizarPerfil, cambiarPassword };

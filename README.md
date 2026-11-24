@@ -149,8 +149,8 @@ Todas las rutas parten de `http://localhost:3000/api`. El detalle de cada endpoi
 | Recurso | Endpoints | Acceso |
 | --- | --- | --- |
 | Estado | `GET /health` | Público |
-| Autenticación | `POST /auth/registro`, `POST /auth/login`, `GET /auth/perfil` | Público y con token |
-| Animales | `GET /animales`, `GET /animales/:id`, `GET /animales/gestion`, `POST /animales`, `PUT /animales/:id`, `PATCH /animales/:id/estado`, `DELETE /animales/:id` | Catálogo público y gestión `ADMIN` |
+| Autenticación | `POST /auth/registro`, `POST /auth/login`, `GET /auth/perfil`, `PATCH /auth/perfil`, `PATCH /auth/password` | Público y con token |
+| Animales | `GET /animales`, `GET /animales/:id`, `GET /animales/gestion`, `POST /animales`, `PUT /animales/:id`, `PATCH /animales/:id`, `PATCH /animales/:id/estado`, `DELETE /animales/:id` | Catálogo público y gestión `ADMIN` |
 | Postulaciones | `POST /postulaciones`, `GET /postulaciones/mias`, `GET /postulaciones`, `GET /postulaciones/:id`, `PATCH /postulaciones/:id/estado`, `DELETE /postulaciones/:id` | `USUARIO` y `ADMIN` |
 | Favoritos | `GET /favoritos`, `POST /favoritos/:animalId`, `DELETE /favoritos/:animalId` | `USUARIO` |
 | Notificaciones | `GET /notificaciones`, `PATCH /notificaciones/:id/leida` | Con token |

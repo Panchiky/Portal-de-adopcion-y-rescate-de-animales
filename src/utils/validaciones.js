@@ -9,6 +9,9 @@ const SEXOS = ['MACHO', 'HEMBRA'];
 const TAMANOS = ['PEQUENO', 'MEDIANO', 'GRANDE'];
 const ESTADOS_ANIMAL = ['BORRADOR', 'DISPONIBLE', 'RESERVADO', 'ADOPTADO', 'ARCHIVADO'];
 const ESTADOS_POSTULACION = ['PENDIENTE', 'EN_REVISION', 'ACEPTADA_EN_PROCESO', 'ADOPCION_COMPLETADA', 'RECHAZADA'];
+const CAMPOS_ANIMAL = ['nombre', 'especie', 'raza', 'sexo', 'edadMeses', 'tamano', 'estado', 'descripcion', 'salud', 'vacunado', 'esterilizado', 'fotoUrl'];
+const CAMPOS_PERFIL = ['nombre', 'apellido', 'telefono', 'comuna'];
+const MENSAJE_PASSWORD = 'Debe tener entre 8 y 72 caracteres, con mayúscula, minúscula y número';
 
 function texto(valor) {
   return typeof valor === 'string' ? valor.trim() : '';
@@ -26,10 +29,51 @@ function idValido(valor, nombre = 'id') {
   return id;
 }
 
-function paginacion(query) {
-  const pagina = Math.max(parseInt(query.pagina, 10) || 1, 1);
-  const limite = Math.min(Math.max(parseInt(query.limite, 10) || 12, 1), 50);
+// Lee ?pagina y ?limite. Si vienen con un valor inválido responde 400 en vez de ignorarlos
+function paginacion(query, limitePorDefecto = 12) {
+  const errores = [];
+  const leer = (nombre, porDefecto, maximo) => {
+    if (query[nombre] === undefined || query[nombre] === '') return porDefecto;
+    const valor = Number(query[nombre]);
+    if (!Number.isInteger(valor) || valor < 1 || valor > maximo) {
+      errores.push({ campo: nombre, mensaje: `Debe ser un número entero entre 1 y ${maximo}` });
+      return porDefecto;
+    }
+    return valor;
+  };
+  const pagina = leer('pagina', 1, 100000);
+  const limite = leer('limite', limitePorDefecto, 50);
+  if (errores.length > 0) {
+    throw new HttpError(400, 'Parámetros de paginación no válidos', errores);
+  }
   return { pagina, limite, offset: (pagina - 1) * limite };
+}
+
+// Lee un filtro opcional de la URL que debe pertenecer a una lista de valores permitidos.
+// Un valor desconocido (por ejemplo ?especie=CABALLO) se registra como error en vez de ignorarse
+function filtroEnum(query, nombre, permitidos, errores) {
+  if (query[nombre] === undefined || query[nombre] === '') return undefined;
+  const valor = String(query[nombre]).trim().toUpperCase();
+  if (!permitidos.includes(valor)) {
+    errores.push({ campo: nombre, mensaje: `Debe ser ${permitidos.join(', ')}` });
+    return undefined;
+  }
+  return valor;
+}
+
+// Lee un filtro de texto opcional de la URL con largo máximo
+function filtroTexto(query, nombre, maximo, errores) {
+  if (query[nombre] === undefined || query[nombre] === '') return undefined;
+  if (typeof query[nombre] !== 'string' || query[nombre].trim().length > maximo) {
+    errores.push({ campo: nombre, mensaje: `Debe ser un texto de máximo ${maximo} caracteres` });
+    return undefined;
+  }
+  return query[nombre].trim() || undefined;
+}
+
+function validarPassword(password) {
+  return typeof password === 'string' && password.length >= 8 && password.length <= 72
+    && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password);
 }
 
 function rutValido(rut) {
@@ -59,8 +103,8 @@ function validarRegistro(body) {
   if (nombre.length < 2 || nombre.length > 80) errores.push({ campo: 'nombre', mensaje: 'Debe tener entre 2 y 80 caracteres' });
   if (apellido.length < 2 || apellido.length > 80) errores.push({ campo: 'apellido', mensaje: 'Debe tener entre 2 y 80 caracteres' });
   if (!EMAIL_REGEX.test(email) || email.length > 150) errores.push({ campo: 'email', mensaje: 'Correo electrónico no válido' });
-  if (password.length < 8 || password.length > 72 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
-    errores.push({ campo: 'password', mensaje: 'Debe tener entre 8 y 72 caracteres, con mayúscula, minúscula y número' });
+  if (!validarPassword(password)) {
+    errores.push({ campo: 'password', mensaje: MENSAJE_PASSWORD });
   }
   if (telefono && !TELEFONO_REGEX.test(telefono)) errores.push({ campo: 'telefono', mensaje: 'Teléfono no válido' });
   if (comuna.length > 80) errores.push({ campo: 'comuna', mensaje: 'Máximo 80 caracteres' });
@@ -113,6 +157,55 @@ function validarAnimal(body) {
   if (datos.fotoUrl && (!URL_REGEX.test(datos.fotoUrl) || datos.fotoUrl.length > 300)) errores.push({ campo: 'fotoUrl', mensaje: 'Debe ser una URL http(s) de máximo 300 caracteres' });
 
   return { errores, datos };
+}
+
+// PATCH: combina solo los campos enviados con los datos actuales del animal y valida el resultado completo
+function validarAnimalParcial(body, actual) {
+  const enviados = CAMPOS_ANIMAL.filter((campo) => body[campo] !== undefined);
+  if (enviados.length === 0) {
+    return { errores: [{ campo: 'body', mensaje: `Envía al menos uno de estos campos: ${CAMPOS_ANIMAL.join(', ')}` }], datos: null };
+  }
+  const combinado = { ...actual };
+  enviados.forEach((campo) => { combinado[campo] = body[campo]; });
+  const { errores, datos } = validarAnimal(combinado);
+  // Solo se informan los errores de los campos que el cliente envió
+  return { errores: errores.filter((e) => enviados.includes(e.campo)), datos };
+}
+
+// PATCH /auth/perfil: datos personales editables (el correo y el rol no se pueden cambiar)
+function validarPerfil(body) {
+  const errores = [];
+  const enviados = CAMPOS_PERFIL.filter((campo) => body[campo] !== undefined);
+  if (enviados.length === 0) {
+    errores.push({ campo: 'body', mensaje: `Envía al menos uno de estos campos: ${CAMPOS_PERFIL.join(', ')}` });
+    return { errores, datos: {} };
+  }
+  const datos = {};
+  enviados.forEach((campo) => { datos[campo] = texto(body[campo]); });
+
+  ['nombre', 'apellido'].forEach((campo) => {
+    if (datos[campo] !== undefined && (datos[campo].length < 2 || datos[campo].length > 80)) {
+      errores.push({ campo, mensaje: 'Debe tener entre 2 y 80 caracteres' });
+    }
+  });
+  if (datos.telefono && !TELEFONO_REGEX.test(datos.telefono)) errores.push({ campo: 'telefono', mensaje: 'Teléfono no válido' });
+  if (datos.comuna && datos.comuna.length > 80) errores.push({ campo: 'comuna', mensaje: 'Máximo 80 caracteres' });
+  // Teléfono y comuna son opcionales: un texto vacío los deja en blanco
+  if (datos.telefono === '') datos.telefono = null;
+  if (datos.comuna === '') datos.comuna = null;
+
+  return { errores, datos };
+}
+
+// PATCH /auth/password
+function validarCambioPassword(body) {
+  const errores = [];
+  const passwordActual = typeof body.passwordActual === 'string' ? body.passwordActual : '';
+  const passwordNueva = typeof body.passwordNueva === 'string' ? body.passwordNueva : '';
+  if (!passwordActual) errores.push({ campo: 'passwordActual', mensaje: 'Ingresa tu contraseña actual' });
+  if (!validarPassword(passwordNueva)) errores.push({ campo: 'passwordNueva', mensaje: MENSAJE_PASSWORD });
+  else if (passwordNueva === passwordActual) errores.push({ campo: 'passwordNueva', mensaje: 'Debe ser distinta de la contraseña actual' });
+  return { errores, datos: { passwordActual, passwordNueva } };
 }
 
 function validarEstadoAnimal(body) {
@@ -178,10 +271,15 @@ module.exports = {
   ESTADOS_POSTULACION,
   idValido,
   paginacion,
+  filtroEnum,
+  filtroTexto,
   rutValido,
   validarRegistro,
   validarLogin,
   validarAnimal,
+  validarAnimalParcial,
+  validarPerfil,
+  validarCambioPassword,
   validarEstadoAnimal,
   validarPostulacion,
   validarEstadoPostulacion,

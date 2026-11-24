@@ -2,22 +2,30 @@ const animalesService = require('../services/animales.service');
 const HttpError = require('../utils/httpError');
 const {
   ESPECIES, SEXOS, TAMANOS, ESTADOS_ANIMAL,
-  idValido, paginacion, validarAnimal, validarEstadoAnimal, exigir,
+  idValido, paginacion, filtroEnum, filtroTexto,
+  validarAnimal, validarAnimalParcial, validarEstadoAnimal, exigir,
 } = require('../utils/validaciones');
 
-function leerFiltros(query) {
-  const filtros = {};
-  const especie = String(query.especie || '').toUpperCase();
-  const tamano = String(query.tamano || '').toUpperCase();
-  const sexo = String(query.sexo || '').toUpperCase();
-  const estado = String(query.estado || '').toUpperCase();
-
-  if (especie && ESPECIES.includes(especie)) filtros.especie = especie;
-  if (tamano && TAMANOS.includes(tamano)) filtros.tamano = tamano;
-  if (sexo && SEXOS.includes(sexo)) filtros.sexo = sexo;
-  if (estado && ESTADOS_ANIMAL.includes(estado)) filtros.estado = estado;
-  if (typeof query.comuna === 'string' && query.comuna.trim()) filtros.comuna = query.comuna.trim().slice(0, 80);
-  if (typeof query.q === 'string' && query.q.trim()) filtros.q = query.q.trim().slice(0, 60);
+// Lee los filtros de la URL. Un valor no permitido responde 400 con el detalle por campo,
+// en vez de ignorarse en silencio y devolver todo el catálogo
+function leerFiltros(query, { conEstado }) {
+  const errores = [];
+  const filtros = {
+    especie: filtroEnum(query, 'especie', ESPECIES, errores),
+    tamano: filtroEnum(query, 'tamano', TAMANOS, errores),
+    sexo: filtroEnum(query, 'sexo', SEXOS, errores),
+    comuna: filtroTexto(query, 'comuna', 80, errores),
+    q: filtroTexto(query, 'q', 60, errores),
+  };
+  // El catálogo público solo muestra animales DISPONIBLE, así que ahí no se acepta ?estado
+  if (conEstado) {
+    filtros.estado = filtroEnum(query, 'estado', ESTADOS_ANIMAL, errores);
+  } else if (query.estado !== undefined) {
+    errores.push({ campo: 'estado', mensaje: 'El catálogo público solo muestra animales DISPONIBLE' });
+  }
+  if (errores.length > 0) {
+    throw new HttpError(400, 'Filtros de búsqueda no válidos', errores);
+  }
   return filtros;
 }
 
@@ -30,7 +38,7 @@ function refugioDelAdmin(req) {
 
 async function listar(req, res, next) {
   try {
-    const { items, meta } = await animalesService.listarDisponibles(leerFiltros(req.query), paginacion(req.query));
+    const { items, meta } = await animalesService.listarDisponibles(leerFiltros(req.query, { conEstado: false }), paginacion(req.query));
     res.status(200).json({ ok: true, data: items, meta });
   } catch (err) {
     next(err);
@@ -39,7 +47,7 @@ async function listar(req, res, next) {
 
 async function listarGestion(req, res, next) {
   try {
-    const { items, meta } = await animalesService.listarDeRefugio(refugioDelAdmin(req), leerFiltros(req.query), paginacion(req.query));
+    const { items, meta } = await animalesService.listarDeRefugio(refugioDelAdmin(req), leerFiltros(req.query, { conEstado: true }), paginacion(req.query));
     res.status(200).json({ ok: true, data: items, meta });
   } catch (err) {
     next(err);
@@ -76,6 +84,20 @@ async function actualizar(req, res, next) {
   }
 }
 
+// PATCH /animales/:id: actualización parcial, solo con los campos enviados
+async function actualizarParcial(req, res, next) {
+  try {
+    const id = idValido(req.params.id);
+    const refugioId = refugioDelAdmin(req);
+    const actual = await animalesService.obtenerPropio(id, refugioId);
+    const datos = exigir(validarAnimalParcial(req.body, actual), 'Datos del animal no válidos');
+    const animal = await animalesService.actualizar(id, refugioId, datos);
+    res.status(200).json({ ok: true, data: animal });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function cambiarEstado(req, res, next) {
   try {
     const id = idValido(req.params.id);
@@ -96,4 +118,4 @@ async function eliminar(req, res, next) {
   }
 }
 
-module.exports = { listar, listarGestion, obtener, crear, actualizar, cambiarEstado, eliminar };
+module.exports = { listar, listarGestion, obtener, crear, actualizar, actualizarParcial, cambiarEstado, eliminar };

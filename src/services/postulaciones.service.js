@@ -105,23 +105,32 @@ async function crear(usuarioId, datos) {
   }
 }
 
-async function listarDeUsuario(usuarioId) {
-  const { rows } = await db.query(`${SELECT_POSTULACION} WHERE p.usuario_id = $1 ORDER BY p.creado_en DESC`, [usuarioId]);
-  return rows.map(postulacionPublica);
-}
-
-async function listarDeRefugio(refugioId, estado) {
-  const valores = [refugioId];
-  let filtro = '';
-  if (estado) {
-    valores.push(estado);
-    filtro = 'AND p.estado = $2';
-  }
-  const { rows } = await db.query(
-    `${SELECT_POSTULACION} WHERE a.refugio_id = $1 ${filtro} ORDER BY p.creado_en DESC`,
+// Devuelve una página de resultados y el total, con el mismo formato { items, meta } del catálogo
+async function listarPaginado(where, valores, { pagina, limite, offset }) {
+  const total = await db.query(
+    `SELECT COUNT(*)::int AS total
+     FROM postulaciones p
+     JOIN animales a ON a.id = p.animal_id
+     ${where}`,
     valores,
   );
-  return rows.map(postulacionPublica);
+  const { rows } = await db.query(
+    `${SELECT_POSTULACION} ${where} ORDER BY p.creado_en DESC, p.id DESC
+     LIMIT $${valores.length + 1} OFFSET $${valores.length + 2}`,
+    [...valores, limite, offset],
+  );
+  return { items: rows.map(postulacionPublica), meta: { pagina, limite, total: total.rows[0].total } };
+}
+
+function listarDeUsuario(usuarioId, paginas) {
+  return listarPaginado('WHERE p.usuario_id = $1', [usuarioId], paginas);
+}
+
+function listarDeRefugio(refugioId, estado, paginas) {
+  if (estado) {
+    return listarPaginado('WHERE a.refugio_id = $1 AND p.estado = $2', [refugioId, estado], paginas);
+  }
+  return listarPaginado('WHERE a.refugio_id = $1', [refugioId], paginas);
 }
 
 async function obtenerConHistorial(id, usuario) {

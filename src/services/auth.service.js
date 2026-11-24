@@ -80,4 +80,37 @@ async function obtenerPerfil(id) {
   return usuarioPublico(rows[0]);
 }
 
-module.exports = { registrar, login, obtenerPerfil };
+// Actualiza solo los campos enviados. Los nombres de columna vienen de una lista fija, nunca del cliente
+const COLUMNAS_PERFIL = { nombre: 'nombre', apellido: 'apellido', telefono: 'telefono', comuna: 'comuna' };
+
+async function actualizarPerfil(id, datos) {
+  const campos = Object.keys(datos).filter((campo) => COLUMNAS_PERFIL[campo]);
+  const asignaciones = campos.map((campo, i) => `${COLUMNAS_PERFIL[campo]} = $${i + 1}`);
+  const valores = campos.map((campo) => datos[campo]);
+  const resultado = await db.query(
+    `UPDATE usuarios SET ${asignaciones.join(', ')} WHERE id = $${campos.length + 1}`,
+    [...valores, id],
+  );
+  if (resultado.rowCount === 0) {
+    throw new HttpError(404, 'Usuario no encontrado');
+  }
+  return obtenerPerfil(id);
+}
+
+async function cambiarPassword(id, { passwordActual, passwordNueva }) {
+  const { rows } = await db.query('SELECT password_hash FROM usuarios WHERE id = $1', [id]);
+  if (rows.length === 0) {
+    throw new HttpError(404, 'Usuario no encontrado');
+  }
+  const coincide = await bcrypt.compare(passwordActual, rows[0].password_hash);
+  if (!coincide) {
+    // 400 y no 401: la sesión es válida, lo incorrecto es el dato del formulario
+    throw new HttpError(400, 'La contraseña actual no es correcta', [
+      { campo: 'passwordActual', mensaje: 'La contraseña actual no es correcta' },
+    ]);
+  }
+  const passwordHash = await bcrypt.hash(passwordNueva, SALT_ROUNDS);
+  await db.query('UPDATE usuarios SET password_hash = $1 WHERE id = $2', [passwordHash, id]);
+}
+
+module.exports = { registrar, login, obtenerPerfil, actualizarPerfil, cambiarPassword };

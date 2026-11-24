@@ -1,7 +1,7 @@
 const postulacionesService = require('../services/postulaciones.service');
 const HttpError = require('../utils/httpError');
 const {
-  ESTADOS_POSTULACION, idValido, validarPostulacion, validarEstadoPostulacion, exigir,
+  ESTADOS_POSTULACION, idValido, paginacion, filtroEnum, validarPostulacion, validarEstadoPostulacion, exigir,
 } = require('../utils/validaciones');
 
 async function crear(req, res, next) {
@@ -16,8 +16,8 @@ async function crear(req, res, next) {
 
 async function listarMias(req, res, next) {
   try {
-    const postulaciones = await postulacionesService.listarDeUsuario(req.usuario.id);
-    res.status(200).json({ ok: true, data: postulaciones });
+    const { items, meta } = await postulacionesService.listarDeUsuario(req.usuario.id, paginacion(req.query, 20));
+    res.status(200).json({ ok: true, data: items, meta });
   } catch (err) {
     next(err);
   }
@@ -28,12 +28,17 @@ async function listarRefugio(req, res, next) {
     if (!req.usuario.refugioId) {
       throw new HttpError(403, 'Tu cuenta de administrador no está asociada a un refugio');
     }
-    const estado = String(req.query.estado || '').toUpperCase();
-    const postulaciones = await postulacionesService.listarDeRefugio(
+    const errores = [];
+    const estado = filtroEnum(req.query, 'estado', ESTADOS_POSTULACION, errores);
+    if (errores.length > 0) {
+      throw new HttpError(400, 'Filtros de búsqueda no válidos', errores);
+    }
+    const { items, meta } = await postulacionesService.listarDeRefugio(
       req.usuario.refugioId,
-      ESTADOS_POSTULACION.includes(estado) ? estado : null,
+      estado || null,
+      paginacion(req.query, 20),
     );
-    res.status(200).json({ ok: true, data: postulaciones });
+    res.status(200).json({ ok: true, data: items, meta });
   } catch (err) {
     next(err);
   }

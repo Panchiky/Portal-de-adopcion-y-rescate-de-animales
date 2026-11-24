@@ -46,6 +46,8 @@ El rol y el refugio viajan dentro del token (`sub`, `rol`, `refugioId`). Un admi
 | POST | `/auth/registro` | Público | Crea una cuenta `USUARIO` y devuelve token | 201 · 400 · 409 · 429 |
 | POST | `/auth/login` | Público | Inicia sesión y devuelve token | 200 · 400 · 401 · 429 |
 | GET | `/auth/perfil` | Con token | Datos del usuario del token | 200 · 401 |
+| PATCH | `/auth/perfil` | Con token | Edita `nombre`, `apellido`, `telefono` y `comuna` (solo los campos enviados). El correo y el rol no se pueden cambiar | 200 · 400 · 401 |
+| PATCH | `/auth/password` | Con token | Cambia la contraseña. Pide `passwordActual` y `passwordNueva` | 200 · 400 · 401 · 429 |
 
 Ejemplo de registro:
 
@@ -75,6 +77,15 @@ Respuesta `201`:
 
 Reglas: nombre y apellido de 2 a 80 caracteres, correo válido y único, contraseña de 8 a 72 caracteres con mayúscula, minúscula y número.
 
+Cambio de contraseña:
+
+```json
+PATCH /api/auth/password
+{ "passwordActual": "Usuario123!", "passwordNueva": "NuevaClave1" }
+```
+
+Si la contraseña actual no coincide responde `400` con el detalle en `passwordActual`. La nueva debe cumplir las mismas reglas del registro y ser distinta de la actual.
+
 ### Animales
 
 | Método | Ruta | Acceso | Descripción | Respuesta |
@@ -83,11 +94,18 @@ Reglas: nombre y apellido de 2 a 80 caracteres, correo válido y único, contras
 | GET | `/animales/gestion` | `ADMIN` | Todos los animales del refugio del admin (cualquier estado) | 200 · 401 · 403 |
 | GET | `/animales/:id` | Público (token opcional) | Ficha de un animal. Los `BORRADOR` y `ARCHIVADO` solo los ve el admin de su refugio | 200 · 404 |
 | POST | `/animales` | `ADMIN` | Crea una ficha en el refugio del admin (por defecto `BORRADOR`) | 201 · 400 · 401 · 403 |
-| PUT | `/animales/:id` | `ADMIN` del refugio | Reemplaza los datos de la ficha | 200 · 400 · 403 · 404 |
+| PUT | `/animales/:id` | `ADMIN` del refugio | Reemplaza los datos de la ficha (cuerpo completo) | 200 · 400 · 403 · 404 |
+| PATCH | `/animales/:id` | `ADMIN` del refugio | Actualización parcial: solo los campos enviados | 200 · 400 · 403 · 404 |
 | PATCH | `/animales/:id/estado` | `ADMIN` del refugio | Cambia solo el estado (publicar, ocultar, archivar) | 200 · 400 · 403 · 404 |
 | DELETE | `/animales/:id` | `ADMIN` del refugio | Elimina la ficha si no tiene postulaciones | 204 · 403 · 404 · 409 |
 
 Parámetros de consulta de `GET /animales`: `especie` (`PERRO`, `GATO`), `tamano` (`PEQUENO`, `MEDIANO`, `GRANDE`), `sexo` (`MACHO`, `HEMBRA`), `comuna` (comuna del refugio), `q` (busca por nombre), `pagina` (desde 1) y `limite` (1 a 50, por defecto 12). `GET /animales/gestion` acepta además `estado`.
+
+Un filtro con un valor no permitido responde `400` con el detalle por campo, en vez de ignorarse. Por ejemplo, `GET /animales?especie=CABALLO`:
+
+```json
+{ "ok": false, "error": { "mensaje": "Filtros de búsqueda no válidos", "detalles": [{ "campo": "especie", "mensaje": "Debe ser PERRO, GATO" }] } }
+```
 
 Cuerpo de `POST` y `PUT`:
 
@@ -115,8 +133,8 @@ Estados de un animal: `BORRADOR` → `DISPONIBLE` (publicado) → `RESERVADO` (t
 | Método | Ruta | Acceso | Descripción | Respuesta |
 | --- | --- | --- | --- | --- |
 | POST | `/postulaciones` | `USUARIO` | Postula a un animal `DISPONIBLE` | 201 · 400 · 403 · 404 · 409 |
-| GET | `/postulaciones/mias` | `USUARIO` | Postulaciones del usuario | 200 |
-| GET | `/postulaciones` | `ADMIN` | Postulaciones del refugio. Filtro opcional `estado` | 200 |
+| GET | `/postulaciones/mias` | `USUARIO` | Postulaciones del usuario, paginadas (`pagina`, `limite`, por defecto 20) | 200 · 400 |
+| GET | `/postulaciones` | `ADMIN` | Postulaciones del refugio, paginadas. Filtro opcional `estado` | 200 · 400 |
 | GET | `/postulaciones/:id` | Dueño o `ADMIN` del refugio | Detalle con historial de estados | 200 · 403 · 404 |
 | PATCH | `/postulaciones/:id/estado` | `ADMIN` del refugio | Avanza o rechaza la postulación | 200 · 400 · 403 · 404 · 409 |
 | DELETE | `/postulaciones/:id` | `USUARIO` dueño | Retira una postulación que sigue `PENDIENTE` | 204 · 403 · 404 · 409 |

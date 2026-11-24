@@ -141,6 +141,7 @@ module.exports = {
   listarDisponibles,
   listarDeRefugio,
   obtenerVisible,
+  obtenerPropio,
   crear,
   actualizar,
   cambiarEstado,
