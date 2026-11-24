@@ -4,6 +4,7 @@ import { heart, heartOutline } from 'ionicons/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import UsuarioLayout from '../../components/UsuarioLayout';
 import EstadoCarga from '../../components/EstadoCarga';
+import MapaRefugio from '../../components/MapaRefugio';
 import { obtenerAnimal, obtenerFavoritos, agregarFavorito, quitarFavorito, ubicacionAnimal } from '../../services/animalesService';
 import { estaAutenticado, obtenerRol } from '../../services/authService';
 import { mensajeError } from '../../services/api';
@@ -74,6 +75,7 @@ const DetalleAnimal: React.FC = () => {
       <p>{animal.description}</p>
       <h3>Refugio y ubicación</h3>
       <IonText color="medium"><p>{ubicacionAnimal(animal)}</p></IonText>
+      <MapaRefugio refugioId={animal.api.refugioId} />
       <h3>Salud</h3>
       <IonText color="medium"><p>{animal.api.salud || 'Sin información de salud registrada.'}</p></IonText>
 

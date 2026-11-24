@@ -137,3 +137,19 @@ export const cambiarEstadoAnimal = async (id: number, estado: EstadoAnimal) => {
 export const eliminarAnimal = async (id: number) => {
   await api.delete(`/animales/${id}`);
 };
+
+// Coordenadas del refugio que la API obtiene desde OpenStreetMap (servicio externo)
+export interface UbicacionRefugio {
+  refugioId: number;
+  refugio: string;
+  direccion: string;
+  latitud: number;
+  longitud: number;
+  precision: 'direccion' | 'comuna';
+  fuente: string;
+}
+
+export const obtenerUbicacionRefugio = async (refugioId: number) => {
+  const { data } = await api.get<RespuestaItem<UbicacionRefugio>>(`/refugios/${refugioId}/ubicacion`);
+  return data.data;
+};

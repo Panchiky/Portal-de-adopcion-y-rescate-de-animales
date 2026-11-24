@@ -111,6 +111,8 @@ Otros comandos disponibles:
 | `npm run preview` | Sirve localmente la versión generada con `npm run build`. |
 | `npm run lint` | Revisa el estilo del código con ESLint. |
 
+**Con Docker:** el `docker-compose.yml` de la rama `backend` levanta la base de datos, la API y este frontend (servido con Nginx en `http://localhost:8100`) con `docker compose up --build`. El `Dockerfile` de esta rama compila la app con `VITE_API_URL` y la sirve con la configuración de `nginx.conf`.
+
 ### Uso
 
 1. En la página de inicio, entra a **Adopta** para ver el catálogo sin iniciar sesión.
@@ -152,7 +154,7 @@ src/
 | Servicio | Endpoints que consume | Vistas que lo usan |
 |---|---|---|
 | `authService.ts` | `POST /auth/login`, `POST /auth/registro` | Inicio de sesión, Registro, Perfil |
-| `animalesService.ts` | `GET /animales`, `GET /animales/:id`, `GET /animales/gestion`, `POST /animales`, `PUT /animales/:id`, `PATCH /animales/:id/estado`, `DELETE /animales/:id`, `GET/POST/DELETE /favoritos` | Explorar, Detalle, Favoritos, Refugios, Apadrinar, Gestión de animales, Nueva y Editar ficha, Resumen |
+| `animalesService.ts` | `GET /animales`, `GET /animales/:id`, `GET /animales/gestion`, `POST /animales`, `PUT /animales/:id`, `PATCH /animales/:id/estado`, `DELETE /animales/:id`, `GET/POST/DELETE /favoritos`, `GET /refugios/:id/ubicacion` | Explorar, Detalle, Favoritos, Refugios, Apadrinar, Gestión de animales, Nueva y Editar ficha, Resumen |
 | `postulacionesService.ts` | `POST /postulaciones`, `GET /postulaciones/mias`, `GET /postulaciones`, `GET /postulaciones/:id`, `PATCH /postulaciones/:id/estado`, `DELETE /postulaciones/:id` | Postular, Mis postulaciones, Detalle de postulación, Solicitudes, Detalle de solicitud, Resumen |
 | `alertasService.ts` | `GET /notificaciones`, `PATCH /notificaciones/:id/leida` | Alertas |
 
@@ -161,6 +163,10 @@ Cada servicio transforma la respuesta de la API al formato que usan las pantalla
 ### Estados de carga y error
 
 El hook `useCarga` (`src/hooks/useCarga.ts`) pide los datos cada vez que se muestra una vista (`useIonViewWillEnter`), así las listas quedan al día al volver atrás. El componente `EstadoCarga` muestra un `IonSpinner` mientras carga, o el error con un botón **Reintentar**. Los formularios desactivan su botón mientras envían, validan en el cliente con las mismas reglas del backend y muestran los errores que devuelve la API (por ejemplo, RUT inválido o postulación repetida).
+
+### Mapa del refugio (API externa)
+
+La ficha del animal muestra la ubicación del refugio en un mapa (`src/components/MapaRefugio.tsx`). El frontend llama a `GET /refugios/:id/ubicacion` del backend, que obtiene las coordenadas desde **OpenStreetMap Nominatim**, y con ellas se muestra el mapa embebido de OpenStreetMap y un enlace **Cómo llegar**. Si el servicio de mapas no responde, la ficha sigue funcionando y solo aparece "Mapa no disponible".
 
 ### Alcance de la integración
 
