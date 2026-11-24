@@ -191,7 +191,7 @@ PATCH /api/postulaciones/1/estado
 - **helmet** para cabeceras HTTP seguras y `x-powered-by` desactivado.
 - **CORS** limitado a los orígenes de `CORS_ORIGIN`.
 - **express-rate-limit** en login y registro.
-- Validación de todos los cuerpos de entrada, eliminación de `<` y `>` en textos (salvo contraseñas) y límite de 1 MB en el JSON.
+- Validación de todos los cuerpos de entrada, normalización de textos sin alterar su contenido (salvo contraseñas, que no se tocan) y límite de 1 MB en el JSON.
 - Consultas SQL **parametrizadas** (`$1`, `$2`, ...) para evitar inyección SQL, y transacciones en las operaciones que tocan varias tablas.
 
 ## Cómo probar con Postman

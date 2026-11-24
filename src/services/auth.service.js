@@ -25,7 +25,7 @@ function generarToken(usuario) {
   return jwt.sign(
     { sub: usuario.id, rol: usuario.rol, refugioId: usuario.refugioId },
     jwtConfig.secret,
-    { expiresIn: jwtConfig.expiresIn },
+    { expiresIn: jwtConfig.expiresIn, algorithm: jwtConfig.algoritmo },
   );
 }
 

@@ -1,10 +1,18 @@
 -- PatitasGo: modelo relacional (PostgreSQL)
 -- Ejecutar sobre una base vacía: psql -U postgres -d patitasgo -f database/schema.sql
+--
+-- ============================================================================
+-- ADVERTENCIA: este script BORRA todas las tablas de PatitasGo y sus datos
+-- (DROP TABLE ... CASCADE) antes de volver a crearlas.
+-- Úsalo solo para crear la base desde cero o reiniciar el entorno de desarrollo.
+-- Nunca lo ejecutes sobre una base con datos reales que quieras conservar.
+-- ============================================================================
 SET client_encoding = 'UTF8';
 
 DROP TABLE IF EXISTS notificaciones, apadrinamientos, favoritos, citas,
   historial_postulaciones, postulaciones, animales, usuarios, refugios, roles CASCADE;
 DROP FUNCTION IF EXISTS fn_actualizado_en() CASCADE;
+DROP FUNCTION IF EXISTS fn_validar_refugio_admin() CASCADE;
 
 CREATE TABLE roles (
   id     SERIAL PRIMARY KEY,
@@ -29,7 +37,8 @@ CREATE TABLE usuarios (
   email          VARCHAR(150) NOT NULL,
   password_hash  VARCHAR(100) NOT NULL,
   rol_id         INT NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,
-  refugio_id     INT REFERENCES refugios(id) ON DELETE SET NULL,
+  -- RESTRICT: no se puede borrar un refugio que aún tiene administradores asignados
+  refugio_id     INT REFERENCES refugios(id) ON DELETE RESTRICT,
   telefono       VARCHAR(20),
   comuna         VARCHAR(80),
   creado_en      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -96,6 +105,7 @@ CREATE TABLE historial_postulaciones (
   creado_en       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- FASE SIGUIENTE (EP3): la tabla queda creada para la Agenda del refugio, pero aún no tiene endpoints.
 CREATE TABLE citas (
   id             SERIAL PRIMARY KEY,
   postulacion_id INT NOT NULL REFERENCES postulaciones(id) ON DELETE CASCADE,
@@ -115,6 +125,8 @@ CREATE TABLE favoritos (
   PRIMARY KEY (usuario_id, animal_id)
 );
 
+-- FASE SIGUIENTE (EP3): la tabla queda creada para el apadrinamiento, pero aún no tiene endpoints
+-- (el pago del frontend es una demostración).
 CREATE TABLE apadrinamientos (
   id         SERIAL PRIMARY KEY,
   usuario_id INT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
@@ -149,3 +161,28 @@ CREATE TRIGGER trg_animales_actualizado BEFORE UPDATE ON animales
   FOR EACH ROW EXECUTE FUNCTION fn_actualizado_en();
 CREATE TRIGGER trg_postulaciones_actualizado BEFORE UPDATE ON postulaciones
   FOR EACH ROW EXECUTE FUNCTION fn_actualizado_en();
+
+-- Regla de integridad: un ADMIN siempre pertenece a un refugio y un USUARIO nunca tiene refugio.
+-- Se usa un trigger porque la regla depende del nombre del rol, que está en otra tabla (un CHECK no puede consultarla).
+CREATE FUNCTION fn_validar_refugio_admin() RETURNS TRIGGER AS $$
+DECLARE
+  nombre_rol VARCHAR(20);
+BEGIN
+  SELECT nombre INTO nombre_rol FROM roles WHERE id = NEW.rol_id;
+  IF nombre_rol = 'ADMIN' AND NEW.refugio_id IS NULL THEN
+    RAISE EXCEPTION 'Un usuario ADMIN debe estar asociado a un refugio'
+      USING ERRCODE = 'check_violation';
+  END IF;
+  IF nombre_rol = 'USUARIO' AND NEW.refugio_id IS NOT NULL THEN
+    RAISE EXCEPTION 'Un usuario con rol USUARIO no puede estar asociado a un refugio'
+      USING ERRCODE = 'check_violation';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_usuarios_refugio_admin BEFORE INSERT OR UPDATE OF rol_id, refugio_id ON usuarios
+  FOR EACH ROW EXECUTE FUNCTION fn_validar_refugio_admin();
+
+COMMENT ON TABLE citas IS 'Fase siguiente (EP3): Agenda del refugio. Tabla creada, aún sin endpoints.';
+COMMENT ON TABLE apadrinamientos IS 'Fase siguiente (EP3): apadrinamientos. Tabla creada, aún sin endpoints; el pago del frontend es una demostración.';

@@ -122,8 +122,9 @@ Incluye claves foráneas, restricciones `CHECK` en los estados, índices en las 
 | `DB_NAME` | `patitasgo` | Nombre de la base de datos |
 | `DB_USER` | `postgres` | Usuario de PostgreSQL |
 | `DB_PASSWORD` | *(tu clave)* | Contraseña de PostgreSQL |
-| `JWT_SECRET` | *(texto largo y aleatorio)* | Clave para firmar los tokens |
+| `JWT_SECRET` | *(texto largo y aleatorio)* | Clave para firmar los tokens, mínimo 32 caracteres |
 | `JWT_EXPIRES_IN` | `2h` | Duración del token |
+| `TRUST_PROXY` | `0` | Cantidad de proxies delante de la API (0 en local) |
 
 > **Seguridad:** nunca subir secretos al repositorio. El archivo `.env` está en `.gitignore` y solo se versiona `.env.example`, sin valores reales.
 
@@ -166,10 +167,11 @@ Todas las rutas parten de `http://localhost:3000/api`. El detalle de cada endpoi
 - Contraseñas con hash bcrypt, con validación de complejidad, y mensajes de login genéricos que no revelan si el correo existe.
 - Consultas SQL parametrizadas en todos los servicios, y transacciones en las operaciones que tocan varias tablas.
 - Validación de cada cuerpo de entrada: tipos, largos, enumeraciones, RUT chileno con dígito verificador y URLs.
-- Eliminación de `<` y `>` en los textos recibidos, para evitar XSS almacenado.
+- Normalización de los textos recibidos (espacios y caracteres de control) sin alterar lo que escribe el usuario. Contra XSS, la API responde solo JSON y React escapa el texto al mostrarlo.
 - `helmet` para cabeceras HTTP seguras, `x-powered-by` desactivado y límite de 1 MB en el JSON.
 - CORS restringido a los orígenes definidos en `CORS_ORIGIN`.
-- Límite de 10 intentos fallidos cada 15 minutos en login y registro (`429`).
+- Límite de 10 intentos fallidos cada 15 minutos en login y registro, y de 500 peticiones cada 15 minutos en toda la API (`429`). `TRUST_PROXY` permite contar la IP real si la API se publica detrás de un proxy.
+- Tokens firmados y verificados solo con `HS256`, con un `JWT_SECRET` de al menos 32 caracteres (la API no inicia si es más corto). En cada petición se vuelven a leer el usuario y su rol desde la base, así un token de una cuenta eliminada o con rol cambiado deja de servir de inmediato.
 - Manejo centralizado de errores: los errores internos responden un mensaje genérico, sin exponer detalles del servidor.
 
 ## Pruebas con Postman
