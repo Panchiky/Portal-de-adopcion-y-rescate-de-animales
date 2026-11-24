@@ -2,7 +2,9 @@ import React from 'react';
 import { IonList, IonItem, IonLabel, IonButton } from '@ionic/react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout';
+import EditarCuenta from '../../components/EditarCuenta';
 import { cerrarSesion, obtenerEmail } from '../../services/authService';
+import { obtenerUsuario } from '../../services/sesion';
 
 const PerfilAdmin: React.FC = () => {
   const navigate = useNavigate();
@@ -18,9 +20,10 @@ const PerfilAdmin: React.FC = () => {
       <IonList inset>
         <IonItem><IonLabel><p>Correo</p><h3>{obtenerEmail()}</h3></IonLabel></IonItem>
         <IonItem><IonLabel><p>Rol</p><h3>Administrador de refugio</h3></IonLabel></IonItem>
-        <IonItem><IonLabel><p>Refugio</p><h3>Huellas Felices</h3></IonLabel></IonItem>
+        <IonItem><IonLabel><p>Refugio</p><h3>{obtenerUsuario()?.refugio ?? 'Sin refugio asignado'}</h3></IonLabel></IonItem>
       </IonList>
-      <IonButton expand="block" color="danger" fill="outline" onClick={handleLogout}>
+      <EditarCuenta />
+      <IonButton className="ion-margin-top" expand="block" color="danger" fill="outline" onClick={handleLogout}>
         Cerrar sesión
       </IonButton>
     </AdminLayout>

@@ -3,6 +3,7 @@ import { IonList, IonItem, IonLabel, IonIcon, IonButton, IonAvatar } from '@ioni
 import { heartOutline, documentTextOutline, pawOutline } from 'ionicons/icons';
 import { useNavigate } from 'react-router-dom';
 import UsuarioLayout from '../../components/UsuarioLayout';
+import EditarCuenta from '../../components/EditarCuenta';
 import { cerrarSesion, obtenerEmail } from '../../services/authService';
 
 const Perfil: React.FC = () => {
@@ -33,7 +34,10 @@ const Perfil: React.FC = () => {
           <IonLabel>Mis postulaciones</IonLabel>
         </IonItem>
       </IonList>
-      <IonButton expand="block" color="danger" fill="outline" onClick={handleLogout}>
+      <div className="ion-padding-horizontal">
+        <EditarCuenta />
+      </div>
+      <IonButton className="ion-margin-top" expand="block" color="danger" fill="outline" onClick={handleLogout}>
         Cerrar sesión
       </IonButton>
     </UsuarioLayout>

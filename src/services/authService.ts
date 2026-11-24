@@ -40,4 +40,36 @@ export const obtenerRol = (): Rol | null => {
 
 export const obtenerEmail = () => obtenerUsuario()?.email ?? '';
 
+export interface DatosPerfil {
+  nombre: string;
+  apellido: string;
+  telefono: string;
+  comuna: string;
+}
+
+// Mantiene los datos guardados en la sesión iguales a los del backend
+const refrescarUsuarioSesion = (usuario: UsuarioSesion) => {
+  const token = obtenerToken();
+  if (token) guardarSesion(token, usuario);
+};
+
+// GET /auth/perfil
+export const obtenerPerfil = async (): Promise<UsuarioSesion> => {
+  const { data } = await api.get<{ data: UsuarioSesion }>('/auth/perfil');
+  refrescarUsuarioSesion(data.data);
+  return data.data;
+};
+
+// PATCH /auth/perfil (FT-07)
+export const actualizarPerfil = async (datos: DatosPerfil): Promise<UsuarioSesion> => {
+  const { data } = await api.patch<{ data: UsuarioSesion }>('/auth/perfil', datos);
+  refrescarUsuarioSesion(data.data);
+  return data.data;
+};
+
+// PATCH /auth/password (FT-08). Si la contraseña actual no coincide, el backend responde 400 (no cierra la sesión)
+export const cambiarPassword = async (passwordActual: string, passwordNueva: string) => {
+  await api.patch('/auth/password', { passwordActual, passwordNueva });
+};
+
 export const rutaInicioPorRol = (rol: Rol | null) => (rol === 'admin' ? '/admin/resumen' : '/catalogo');

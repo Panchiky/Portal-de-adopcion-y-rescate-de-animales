@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonIcon, IonButton } from '@ionic/react';
 import { arrowBackOutline } from 'ionicons/icons';
 import { MenuLateralAdmin, BarraInferiorAdmin } from '../../components/MenuAdmin';
+import AvisoDemo from '../../components/AvisoDemo';
 import './AgendaAdmin.css';
 
 const AgendaAdmin: React.FC = () => {
@@ -74,6 +75,10 @@ const AgendaAdmin: React.FC = () => {
                   Volver a solicitudes
                 </IonButton>
               </div>
+
+              <AvisoDemo>
+                Esta agenda muestra datos de ejemplo. La tabla <code>citas</code> ya existe en la base de datos y sus endpoints se implementarán en la siguiente entrega.
+              </AvisoDemo>
 
               <h4 className="overline-title">AGENDA DEL REFUGIO</h4>
               <h1 className="admin-page-title">Entrevistas · {dia.titulo}{dia.tipo === 'hoy' ? ' (hoy)' : ''}</h1>

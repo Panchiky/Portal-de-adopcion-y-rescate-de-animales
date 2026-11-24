@@ -56,12 +56,12 @@ const aPostulacion = (p: PostulacionApi): Postulacion => ({
 });
 
 export const obtenerMisPostulaciones = async () => {
-  const { data } = await api.get<{ data: PostulacionApi[] }>('/postulaciones/mias');
+  const { data } = await api.get<{ data: PostulacionApi[] }>('/postulaciones/mias', { params: { limite: 50 } });
   return data.data.map(aPostulacion);
 };
 
 export const obtenerPostulacionesRefugio = async (estado?: EstadoPostulacion) => {
-  const { data } = await api.get<{ data: PostulacionApi[] }>('/postulaciones', { params: { estado } });
+  const { data } = await api.get<{ data: PostulacionApi[] }>('/postulaciones', { params: { estado, limite: 50 } });
   return data.data.map(aPostulacion);
 };
 

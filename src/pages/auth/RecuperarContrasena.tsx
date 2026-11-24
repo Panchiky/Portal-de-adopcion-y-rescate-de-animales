@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton, IonContent, IonInput, IonButton, IonText } from '@ionic/react';
+import AvisoDemo from '../../components/AvisoDemo';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -28,11 +29,14 @@ const RecuperarContrasena: React.FC = () => {
       </IonHeader>
       <IonContent className="ion-padding">
         <div style={{ maxWidth: 420, margin: '0 auto' }}>
+          <AvisoDemo>
+            El envío del correo de recuperación aún no está conectado: no se enviará ningún correo. Si recuerdas tu contraseña, puedes cambiarla desde tu Perfil.
+          </AvisoDemo>
           {enviado ? (
             <>
-              <h2>Revisa tu correo</h2>
+              <h2>Solicitud registrada (demo)</h2>
               <IonText color="medium">
-                <p>Si existe una cuenta asociada a <strong>{email}</strong>, recibirás un enlace temporal para crear una nueva contraseña.</p>
+                <p>En la versión final, si existe una cuenta asociada a <strong>{email}</strong>, recibirá un enlace temporal para crear una nueva contraseña.</p>
               </IonText>
               <IonButton expand="block" routerLink="/login" color="success">Volver a iniciar sesión</IonButton>
             </>

@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { IonSegment, IonSegmentButton, IonLabel, IonInput, IonButton, IonText, IonAlert } from '@ionic/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import UsuarioLayout from '../../components/UsuarioLayout';
+import AvisoDemo from '../../components/AvisoDemo';
 import { obtenerAnimal } from '../../services/animalesService';
 import { useCarga } from '../../hooks/useCarga';
 
@@ -22,6 +23,9 @@ const Apadrinar: React.FC = () => {
   return (
     <UsuarioLayout titulo={`Apadrinar a ${animal?.name ?? ''}`} volverA={`/animales/${id}`}>
       <h1>Apadrinar a {animal?.name}</h1>
+      <AvisoDemo>
+        El pago es una simulación: no se realiza ningún cobro ni se guarda el aporte. La tabla <code>apadrinamientos</code> y el pago real se conectarán en la siguiente entrega.
+      </AvisoDemo>
       <IonText color="medium">
         <p>Tu aporte ayuda a cubrir alimento y atención veterinaria. Apadrinar no crea una postulación ni da prioridad de adopción.</p>
       </IonText>
@@ -45,13 +49,13 @@ const Apadrinar: React.FC = () => {
       />
 
       <IonButton className="ion-margin-top" expand="block" color="success" disabled={!montoValido} onClick={() => setConfirmar(true)}>
-        Continuar al pago
+        Continuar al pago (demo)
       </IonButton>
 
       <IonAlert
         isOpen={confirmar}
         header="Confirmar aporte"
-        message={`Aporte ${frecuencia === 'MENSUAL' ? 'mensual' : 'único'} de $${montoNumero.toLocaleString('es-CL')} para ${animal?.name}. El pago real se conectará con un proveedor externo en la entrega final.`}
+        message={`Aporte ${frecuencia === 'MENSUAL' ? 'mensual' : 'único'} de $${montoNumero.toLocaleString('es-CL')} para ${animal?.name}. Esto es una demostración: no se realizará ningún cobro.`}
         buttons={[
           { text: 'Cancelar', role: 'cancel' },
           { text: 'Confirmar', handler: () => navigate(`/animales/${id}`) }

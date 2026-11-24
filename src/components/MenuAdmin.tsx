@@ -2,6 +2,7 @@ import React from 'react';
 import { IonIcon, IonFooter, useIonRouter } from '@ionic/react';
 import { gridOutline, documentTextOutline, pawOutline, calendarOutline, personOutline } from 'ionicons/icons';
 import { cerrarSesion } from '../services/authService';
+import { obtenerUsuario } from '../services/sesion';
 import './MenuAdmin.css';
 
 const ITEMS = [
@@ -44,7 +45,7 @@ export const MenuLateralAdmin: React.FC<MenuAdminProps> = ({ activo }) => {
 
       <div className="admin-sidebar-bottom">
         <div className="refugio-info">
-          <h4>Huellas Felices</h4>
+          <h4>{obtenerUsuario()?.refugio ?? 'Refugio'}</h4>
           <p>Administrador</p>
           <button className="btn-logout" onClick={handleLogout}>Cerrar sesión</button>
         </div>

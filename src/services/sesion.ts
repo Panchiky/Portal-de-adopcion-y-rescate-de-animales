@@ -10,6 +10,7 @@ export interface UsuarioSesion {
   email: string;
   rol: RolApi;
   refugioId: number | null;
+  refugio?: string | null;
   telefono: string | null;
   comuna: string | null;
 }
